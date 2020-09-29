@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 80%;
+        width: 80%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Demo Map Prospector<br></h1>
+    <div id="map"></div>
+    <script>
+      var map;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 4,
+          center: new google.maps.LatLng(19.432608, -99.133209),
+          mapTypeId: 'terrain',
+
+        });
+
+        //console.log(map);
+        // load geoJSON
+        //map.data.loadGeoJson('https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/test.json');
+
+        // Sylle loaded data attributes
+        map.data.setStyle({
+            icon: 'https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Prospector_3D%20Logo_Icon_ico32.ico',
+            fillColor: 'green'
+        });
+
+
+
+        // ********* clustering stuff
+
+        // Create an array of alphabetical characters used to label the markers.
+        var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        // locations data
+        var xmlhttp = new XMLHttpRequest();
+        var locations;
+        xmlhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            var myObj = JSON.parse(this.responseText);
+            locations=myObj;
+            console.log(myObj);
+            console.log(locations);
+          }
+        };
+        function reqListener () {
+            console.log(JSON.parse(this.responseText));
+
+            locations=JSON.parse(this.responseText);
+
+            var markers = locations.features.map(function(location, i) {
+              //console.log(location);
+              const marker= new google.maps.Marker({
+                position: new google.maps.LatLng(location.geometry.coordinates[1],location.geometry.coordinates[0]),
+                //label: labels[i % labels.length]
+                icon: 'https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Prospector_3D%20Logo_Icon_ico32.ico',
+                fillColor: 'green'
+              });
+
+
+              const prop=location.properties;
+              var contentString="";
+
+              if(prop!=null){
+                 contentString =
+                        '<img src="https://static.wixstatic.com/media/af6ea5_7af36e8617e2483ebd2ccce4ca066868~mv2.png/v1/fill/w_236,h_80,al_c,q_85,usm_0.66_1.00_0.01/Screen%20Shot%202020-06-03%20at%209_15_10%20PM.webp">'+
+                        '<div id="content">' +
+                        '<div id="siteNotice">' +
+                        '</div>' +
+                        '<h3 id="firstHeading" class="firstHeading">'+prop.site_name+'  -  '+prop.dep_id+'</h3>' +
+                        '<div id="bodyContent">' +
+                        "<p><b>"+prop.country+" - "+prop.state+
+                        "<br>Minerals: <br>"+prop.ore+" <br>"+prop.commod1+"<br>"+prop.commod2+
+                        '<br><br><a href="'+prop.url+'">' +
+                        prop.url+'</a>' +
+                        "</div>" +
+                        "</div>";
+              }else{
+                  contentString ='<div id="content">' +
+                  '<div id="siteNotice">' +
+                  "</div>" +
+                  '<h1 id="firstHeading" class="firstHeading"> Sitename: Sitename  - department id </h1>' +
+
+                  "</div>" +
+                  "</div>";
+              }
+
+
+
+            const infowindow = new google.maps.InfoWindow({
+                content: contentString,
+            });
+
+            marker.addListener("click", () => {
+                infowindow.open(map, marker);
+            });
+
+
+            return marker;
+            });
+
+            // Add a marker clusterer to manage the markers.
+            var markerCluster = new MarkerClusterer(map, markers,
+                {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+
+        };
+
+
+        xmlhttp.addEventListener("load", reqListener);
+
+        xmlhttp.open("GET", "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/mexico.json", true);
+        locations=xmlhttp.send();
+
+        console.log("test");
+        console.log(locations);
+
+        // Add some markers to the map.
+        // Note: The code uses the JavaScript Array.prototype.map() method to
+        // create an array of markers based on a given "locations" array.
+        // The map() method here has nothing to do with the Google Maps API.
+
+      };
+
+
+    </script>
+    <script src="https://unpkg.com/@google/markerclustererplus@5.1.0/dist/markerclustererplus.min.js"></script>
+    <script defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjl3X5q6XmuETXG8wNyCUb2kOD0IK9PNE&callback=initMap">
+    </script>
+  </body>
+</html>
