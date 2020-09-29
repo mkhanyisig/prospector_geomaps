@@ -1,1 +1,4 @@
-# prospector_geomaps
+# Prospector Maps using USGS data
+
+
+
