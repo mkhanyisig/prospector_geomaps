@@ -18,5 +18,9 @@ Jupyter notebook and python script automate the process of producing a GeoJSON f
 
 <img src="https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Screen%20Shot%202020-09-29%20at%206.54.52%20PM.png">
 
+#### Mineral icons according to first element at site using Prospector Icons
+
+<img src="https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/Screen%20Shot%202020-10-05%20at%2010.09.16%20PM.png">
+
 
 
