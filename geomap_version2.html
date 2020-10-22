@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 80%;
+        width: 80%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Demo Map Prospector<br></h1>
+    <div id="map"></div>
+    <script>
+      var map;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 4,
+          center: new google.maps.LatLng(19.432608, -99.133209),
+          mapTypeId: 'terrain',
+
+        });
+
+        //console.log(map);
+        // load geoJSON
+        //map.data.loadGeoJson('https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/test.json');
+
+        // ********* clustering stuff
+
+        // Create an array of alphabetical characters used to label the markers.
+        var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        // locations data
+        var xmlhttp = new XMLHttpRequest();
+        var locations;
+        xmlhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+              var myObj = JSON.parse(this.responseText);
+              locations=myObj;
+              console.log(myObj);
+              console.log(locations);
+          }
+        };
+        // Customizing markers by map features
+        var icons = {
+          "gold": {
+            icon: 'https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Gold_32.ICO'
+          },
+          "copper": {
+            icon: 'https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Copper_32.ICO'
+          },
+          "aggregate":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Aggregate.ICO"
+          },
+          "aluminum":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Aluminum.ICO"
+          },
+          "antimony":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Antimony.ICO"
+          },
+          "barite":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Barite.ICO"
+          },
+          "berrylium":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Beryllium.ICO"
+          },
+          "boron":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Boron.ICO"
+          },
+          "cerium":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Cerium.ICO"
+          },
+          "cesium":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Cesium.ICO"
+          },
+          "chalcopyrite":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Chalcopyrite.ICO"
+          },
+          "chromite":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Chromite.ICO"
+          },
+          "chromium":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Chromium.ICO"
+          },
+          "coal":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Coal.ICO"
+          },
+          "diamond":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Diamond.ICO"
+          },
+          "emerald":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Emerald.ICO"
+          },
+          "graphite":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Graphite.ICO"
+          },
+          "lead":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Lead.ICO"
+          },
+          "magnesium":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Magnesium_.ICO"
+          },
+          "magnetite":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Magnetite.ICO"
+          },
+          "mercury":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Mercury.ICO"
+          },
+          "molybdenite":{
+              icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Molybdenite.ICO"
+          },
+          "molybdenum":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Molybdenum.ICO"
+          },
+          "nickel":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Nickel_2x.ICO"
+          },
+          "nobium":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Niobium.ICO"
+          },
+          "palladium":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Palladium_2x.ICO"
+          },
+          "phosphate":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Phosphate.ICO"
+          },
+          "platinum-grougp":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Platinum-grougp.ICO"
+          },
+          "platinum":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Platinum.ICO"
+          },
+          "potash":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Potash.ICO"
+          },
+          "potassium":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Potassium.ICO"
+          },
+          "rhodium":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Rhodium.ICO"
+          },
+          "silver":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Silver_2x.ICO"
+          },
+          "titanium":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Titanium.ICO"
+          },
+          "tungsten":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Tungsten.ICO"
+          },
+          "vanadium":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Vanadium.ICO"
+          },
+          "zeolite":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Zeolite.ICO"
+          },
+          "zinc":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Zinc.ICO"
+          },
+          "manganese":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/manganese.ICO"
+          },
+          "rare_earth":{
+                  icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/rare_earth.ICO"
+          }
+          ,
+          "other": {
+              icon: 'https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Prospector_3D%20Logo_Icon_ico32.ico'
+          }
+        };
+
+
+
+        function reqListener () {
+            console.log(JSON.parse(this.responseText));
+
+            locations=JSON.parse(this.responseText);
+
+            var markers = locations.features.map(function(location, i) {// create marker for each location
+
+              // *** do tag calculation here ***
+              //console.log(location.properties.mineral_tags);
+
+              var tag;
+              if(location.properties.mineral_tags.length==0){
+                  tag="other";
+              }
+              else if(location.properties.mineral_tags[0]=="gold"){
+                  tag="gold";
+              }else if(location.properties.mineral_tags=="copper"){
+                  tag="copper";
+              }else if(location.properties.mineral_tags=="aggregate"){
+                  tag="aggregate";
+              }
+              else if(location.properties.mineral_tags=="aluminum"){
+                  tag="aluminum";
+              }
+              else if(location.properties.mineral_tags=="antimony"){
+                  tag="antimony";
+              }
+
+              else if(location.properties.mineral_tags=="barite"){
+                  tag="barite";
+              }
+              else if(location.properties.mineral_tags=="berrylium"){
+                  tag="berrylium";
+              }
+              else if(location.properties.mineral_tags=="boron"){
+                  tag="boron";
+              }
+              else if(location.properties.mineral_tags=="ceriumy"){
+                  tag="cerium";
+              }
+              else if(location.properties.mineral_tags=="cesium"){
+                  tag="cesium";
+              }
+              else if(location.properties.mineral_tags=="chalcopyrite"){
+                  tag="chalcopyrite";
+              }
+              else if(location.properties.mineral_tags=="chromite"){
+                  tag="chromite";
+              }
+
+              else if(location.properties.mineral_tags=="chromium"){
+                  tag="chromium";
+              }
+              else if(location.properties.mineral_tags=="coal"){
+                  tag="coal";
+              }
+              else if(location.properties.mineral_tags=="diamond"){
+                  tag="diamond";
+              }
+              else if(location.properties.mineral_tags=="emerald"){
+                  tag="emerald";
+              }
+              else if(location.properties.mineral_tags=="graphite"){
+                  tag="graphite";
+              }
+              else if(location.properties.mineral_tags=="lead"){
+                  tag="lead";
+              }
+              else if(location.properties.mineral_tags=="magnesium"){
+                  tag="magnesium";
+              }
+              else if(location.properties.mineral_tags=="magnetite"){
+                  tag="magnetite";
+              }
+              else if(location.properties.mineral_tags=="mercury"){
+                  tag="mercury";
+              }
+              else{
+                  tag="other";
+              }
+              //console.log(icons[tag].icon);
+
+              //console.log(location);
+              const marker= new google.maps.Marker({
+              position: new google.maps.LatLng(location.geometry.coordinates[1],location.geometry.coordinates[0]),
+              //label: labels[i % labels.length]
+              icon: icons[tag].icon,
+              fillColor: 'green'
+            });
+
+            const prop=location.properties;
+            var contentString="";
+
+            if(prop!=null){
+               contentString =
+                      '<img src="https://static.wixstatic.com/media/af6ea5_7af36e8617e2483ebd2ccce4ca066868~mv2.png/v1/fill/w_236,h_80,al_c,q_85,usm_0.66_1.00_0.01/Screen%20Shot%202020-06-03%20at%209_15_10%20PM.webp">'+
+                      '<div id="content">' +
+                      '<div id="siteNotice">' +
+                      '</div>' +
+                      '<h3 id="firstHeading" class="firstHeading">'+prop.site_name+'  -  '+prop.dep_id+'</h3>' +
+                      '<div id="bodyContent">' +
+                      "<p><b>"+prop.country+" - "+prop.state+
+                      "<br>Minerals: "+prop.mineral_tags+" <br>"+
+                      '<br><br><a href="'+prop.url+'">' +
+                      prop.url+'</a>' +
+                      "</div>" +
+                      "</div>";
+            }else{
+                contentString ='<div id="content">' +
+                '<div id="siteNotice">' +
+                "</div>" +
+                '<h1 id="firstHeading" class="firstHeading"> Sitename: Sitename  - department id </h1>' +
+
+                "</div>" +
+                "</div>";
+            }
+
+          const infowindow = new google.maps.InfoWindow({
+              content: contentString,
+          });
+
+          marker.addListener("click", () => {
+              infowindow.open(map, marker);
+          });
+
+          return marker;
+          });
+
+          // Add a marker clusterer to manage the markers.
+          var markerCluster = new MarkerClusterer(map, markers,
+              {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+
+          markerCluster.setGridSize(0);
+
+
+
+        };
+
+
+        xmlhttp.addEventListener("load", reqListener);
+
+        xmlhttp.open("GET", "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/mexico_tags.json", true);
+        locations=xmlhttp.send();
+
+        console.log("test");
+        console.log(locations);
+
+        // Add some markers to the map.
+        // Note: The code uses the JavaScript Array.prototype.map() method to
+        // create an array of markers based on a given "locations" array.
+        // The map() method here has nothing to do with the Google Maps API.
+
+      };
+
+
+    </script>
+    <script src="https://unpkg.com/@google/markerclustererplus@5.1.0/dist/markerclustererplus.min.js"></script>
+    <script defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjl3X5q6XmuETXG8wNyCUb2kOD0IK9PNE&callback=initMap">
+    </script>
+  </body>
+</html>
