@@ -22,5 +22,8 @@ Jupyter notebook and python script automate the process of producing a GeoJSON f
 
 <img src="https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/Screen%20Shot%202020-10-05%20at%2010.09.16%20PM.png">
 
+#### Mineral icon map with buttons and input fields that modify map icons. Allows adding countries and selecting only certain minerals
+
+<img src="https://github.com/mkhanyisig/RandomCodeSamples/blob/master/Screen%20Shot%202020-10-22%20at%205.42.07%20AM.png">
 
 
