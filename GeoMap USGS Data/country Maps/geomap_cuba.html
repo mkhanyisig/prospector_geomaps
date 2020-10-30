@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Earthquake Markers</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <style>
+
+
+    </style>
+
+
+    <script defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjl3X5q6XmuETXG8wNyCUb2kOD0IK9PNE&callback=initMap">
+    </script>
+    <style type="text/css">
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+        width: 90%;
+      }
+
+      /* Optional: Makes the sample page fill the window. */
+      html,
+      body {
+        height: 85%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script>
+      let map;
+      var markers=[];
+
+      function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 8,
+          center: new google.maps.LatLng(23, -82),
+          mapTypeId: 'terrain',
+        });
+        // Create a <script> tag and set the USGS URL as the source.
+        const script = document.createElement("script");
+        // This example uses a local copy of the GeoJSON stored at
+        // http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojsonp
+        //script.src ="http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojsonp";
+
+        //console.log(script);
+
+        var res=httpGet("https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/country%20JSONS/cuba.json");
+
+        //console.log(res);
+        var obj=JSON.parse(res);
+        //console.log(obj);
+        //document.getElementsByTagName("head")[0].appendChild(script);
+        eqfeed_callback(obj);
+
+        var refresh = document.getElementById("refresh");
+        google.maps.event.addDomListener(refresh, "click", refreshMap);
+
+        refreshMap();
+      }
+
+      // Customizing markers by map features
+      var icons = {
+        "gold": {
+          icon: 'https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Gold_32.ICO'
+        },
+        "copper": {
+          icon: 'https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Copper_32.ICO'
+        },
+        "aggregate":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Aggregate.ICO"
+        },
+        "aluminum":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Aluminum.ICO"
+        },
+        "antimony":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Antimony.ICO"
+        },
+        "barite":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Barite.ICO"
+        },
+        "berrylium":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Beryllium.ICO"
+        },
+        "boron":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Boron.ICO"
+        },
+        "cerium":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Cerium.ICO"
+        },
+        "cesium":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Cesium.ICO"
+        },
+        "chalcopyrite":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Chalcopyrite.ICO"
+        },
+        "chromite":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Chromite.ICO"
+        },
+        "chromium":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Chromium.ICO"
+        },
+        "coal":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Coal.ICO"
+        },
+        "diamond":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Diamond.ICO"
+        },
+        "emerald":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Emerald.ICO"
+        },
+        "graphite":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Graphite.ICO"
+        },
+        "lead":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Lead.ICO"
+        },
+        "magnesium":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Magnesium_.ICO"
+        },
+        "magnetite":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Magnetite.ICO"
+        },
+        "mercury":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Mercury.ICO"
+        },
+        "molybdenite":{
+            icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Molybdenite.ICO"
+        },
+        "molybdenum":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Molybdenum.ICO"
+        },
+        "nickel":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Nickel_2x.ICO"
+        },
+        "nobium":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Niobium.ICO"
+        },
+        "palladium":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Palladium_2x.ICO"
+        },
+        "phosphate":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Phosphate.ICO"
+        },
+        "platinum-grougp":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Platinum-grougp.ICO"
+        },
+        "platinum":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Platinum.ICO"
+        },
+        "potash":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Potash.ICO"
+        },
+        "potassium":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Potassium.ICO"
+        },
+        "rhodium":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Rhodium.ICO"
+        },
+        "silver":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Silver_2x.ICO"
+        },
+        "titanium":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Titanium.ICO"
+        },
+        "tungsten":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Tungsten.ICO"
+        },
+        "vanadium":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Vanadium.ICO"
+        },
+        "zeolite":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Zeolite.ICO"
+        },
+        "zinc":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Zinc.ICO"
+        },
+        "manganese":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/manganese.ICO"
+        },
+        "rare_earth":{
+                icon: "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/rare_earth.ICO"
+        }
+        ,
+        "other": {
+            icon: 'https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Prospector_3D%20Logo_Icon_ico32.ico'
+        }
+      };
+
+
+      // Loop through the results array and place a marker for each
+      // set of coordinates.
+      const eqfeed_callback = function (results) {
+        for (let i = 0; i < results.features.length; i++) {
+          const coords = results.features[i].geometry.coordinates;
+
+          var location=results.features[i];
+          var tag;
+
+          if(location.properties.mineral_tags.length==0){
+              tag="other";
+          }
+          else if(location.properties.mineral_tags[0]=="gold"){
+              tag="gold";
+          }else if(location.properties.mineral_tags[0]=="copper"){
+              tag="copper";
+          }else if(location.properties.mineral_tags[0]=="aggregate"){
+              tag="aggregate";
+          }
+          else if(location.properties.mineral_tags[0]=="aluminum"){
+              tag="aluminum";
+          }
+          else if(location.properties.mineral_tags[0]=="antimony"){
+              tag="antimony";
+          }
+          else if(location.properties.mineral_tags[0]=="barite"){
+              tag="barite";
+          }
+          else if(location.properties.mineral_tags[0]=="berrylium"){
+              tag="berrylium";
+          }
+          else if(location.properties.mineral_tags[0]=="boron"){
+              tag="boron";
+          }
+          else if(location.properties.mineral_tags[0]=="ceriumy"){
+              tag="cerium";
+          }
+          else if(location.properties.mineral_tags[0]=="cesium"){
+              tag="cesium";
+          }
+          else if(location.properties.mineral_tags[0]=="chalcopyrite"){
+              tag="chalcopyrite";
+          }
+          else if(location.properties.mineral_tags[0]=="chromite"){
+              tag="chromite";
+          }
+          else if(location.properties.mineral_tags[0]=="chromium"){
+              tag="chromium";
+          }
+          else if(location.properties.mineral_tags[0]=="coal"){
+              tag="coal";
+          }
+          else if(location.properties.mineral_tags[0]=="diamond"){
+              tag="diamond";
+          }
+          else if(location.properties.mineral_tags[0]=="emerald"){
+              tag="emerald";
+          }
+          else if(location.properties.mineral_tags[0]=="graphite"){
+              tag="graphite";
+          }
+          else if(location.properties.mineral_tags[0]=="lead"){
+              tag="lead";
+          }
+          else if(location.properties.mineral_tags[0]=="magnesium"){
+              tag="magnesium";
+          }
+          else if(location.properties.mineral_tags[0]=="magnetite"){
+              tag="magnetite";
+          }
+          else if(location.properties.mineral_tags[0]=="mercury"){
+              tag="mercury";
+          }
+          else{
+              tag="other";
+          }
+
+          //console.log(icons[tag].icon);
+
+          const latLng = new google.maps.LatLng(coords[1], coords[0]);
+          const marker=new google.maps.Marker({
+            position: latLng,
+            map: map,
+            icon: icons[tag].icon,
+            //fillColor: 'green'
+          });
+
+          const prop=location.properties;
+          var contentString="";
+
+          if(prop!=null){
+             contentString =
+                    '<img src="https://static.wixstatic.com/media/af6ea5_7af36e8617e2483ebd2ccce4ca066868~mv2.png/v1/fill/w_236,h_80,al_c,q_85,usm_0.66_1.00_0.01/Screen%20Shot%202020-06-03%20at%209_15_10%20PM.webp">'+
+                    '<div id="content">' +
+                    '<div id="siteNotice">' +
+                    '</div>' +
+                    '<h3 id="firstHeading" class="firstHeading">'+prop.site_name+'  -  '+prop.dep_id+'</h3>' +
+                    '<div id="bodyContent">' +
+                    "<p><b>"+prop.country+" - "+prop.state+
+                    "<br>Minerals: "+prop.mineral_tags+" <br>"+
+                    '<br><br><a href="'+prop.url+'">' +
+                    prop.url+'</a>' +
+                    "</div>" +
+                    "</div>";
+          }else{
+              contentString ='<div id="content">' +
+              '<div id="siteNotice">' +
+              "</div>" +
+              '<h1 id="firstHeading" class="firstHeading"> Sitename: Sitename  - department id </h1>' +
+
+              "</div>" +
+              "</div>";
+          }
+
+        const infowindow = new google.maps.InfoWindow({
+            content: contentString,
+        });
+
+        marker.addListener("click", () => {
+            infowindow.open(map, marker);
+        });
+
+        markers.push([marker,prop.mineral_tags,prop.country,prop.state]);
+
+        }
+      };
+
+      function httpGet(theUrl){
+          var xmlHttp = new XMLHttpRequest();
+          xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+          xmlHttp.send( null );
+          return xmlHttp.responseText;
+      };
+
+      // ******   new methods
+
+      // Sets the map on all markers in the array.
+      function setMapOnAll(map) {
+        for (let i = 0; i < markers.length; i++) {
+          markers[i][0].setMap(map);
+        }
+      }
+
+      // Shows any markers currently in the array.
+      function showMarkers() {
+        setMapOnAll(map);
+      }
+
+      // modify to process all marker attributes and update using fields
+      function refreshMap() { // clear markers and update with inputs
+          console.log("refreshing map");
+
+          var zoom = document.getElementById("zoom");
+          var zoom_level = zoom.options[zoom.selectedIndex].value;
+
+          console.log("zoom level: "+zoom_level);
+
+          var minerals_obj = document.getElementById("mineral");
+          var mineral = minerals_obj.options[minerals_obj.selectedIndex].value;
+
+          console.log("selected mineral: "+mineral);
+
+          var central_lat=document.getElementById('center_lat').value;
+          var central_long=document.getElementById('center_long').value;
+
+          console.log("centre coords :  "+typeof(central_lat)+"     "+central_long);
+
+          // Update fields
+          // *** zoom
+          if(zoom_level>0){
+            var z=(Number(zoom_level));
+            map.setZoom(z);
+          }
+          // *** set center
+          if(central_lat!=""  && central_long!=""){
+              var lat=Number(central_lat);
+              var long=Number(central_long);
+              console.log("*** New center :"+lat+", "+long);
+              map.setCenter(new google.maps.LatLng(lat, long));
+          }
+
+          console.log("Zoom level: "+map.zoom);
+
+          // filter out minerals
+          for(let i = 0; i < markers.length; i++){
+              //console.log("Mineral array: "+markers[i][1]);
+              //console.log("Selected mineral: "+mineral);
+              console.log("country: "+markers[i][2]);
+              if(mineral=="All"){
+                  // place on map, visible
+                  //console.log("Mineral: All");
+                  markers[i][0].setMap(map);
+              }
+              else if(markers[i][1].includes(mineral.toLowerCase())){
+                  //console.log("toggle: "+mineral);
+                  // place on map, visible
+                  markers[i][0].setMap(map);
+              }else{
+                  markers[i][0].setMap(null);
+              }
+          }
+      }
+
+      // Removes the markers from the map, but keeps them in the array.
+      function clearMarkers() {
+        setMapOnAll(null);
+      }
+
+      // Deletes all markers in the array by removing references to them.
+      function deleteMarkers() {
+        clearMarkers();
+        markers = [];
+      }
+    </script>
+  </head>
+
+  <body>Cuba<br></h1>
+    <div id="map"></div>
+
+    <div id="inline-actions">
+      <span>Zoom level:
+        <select id="zoom">
+          <option value="8">Default</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+          <option value="11">11</option>
+          <option value="12">12</option>
+        </select>
+      </span>
+      <span>Mineral:
+        <select id="mineral">
+          <option value="All">All</option>
+          <option value="Gold">Gold</option>
+          <option value="Copper">Copper</option>
+        </select>
+      </span>
+      <label for="center_lat"> Center lat:</label><input type="number" id="center_lat" name="latitude" style="width: 50px;">
+      <label for="center_long"> Center long:</label><input type="number" id="center_long" name="longitude" style="width: 50px;">
+      <input id="refresh" type="button"  onclick="refreshMap();" value="Refresh Map">
+      <input onclick="clearMarkers();" type="button" value="Hide Markers" />
+      <input onclick="showMarkers();" type="button" value="Show All Markers" />
+      <input onclick="deleteMarkers();" type="button" value="Delete Markers" />
+    </div>
+  </body>
+</html>
