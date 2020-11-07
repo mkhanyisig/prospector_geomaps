@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <p>
+
+    Head
+    <title>Earthquake Markers</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <style>
+
+
+    </style>
+
+
+    <script defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjl3X5q6XmuETXG8wNyCUb2kOD0IK9PNE&callback=initMap">
+    </script>
+    <style type="text/css">
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+        width: 90%;
+      }
+
+      /* Optional: Makes the sample page fill the window. */
+      html,
+      body {
+        height: 85%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script>
+
+      // custom styling of map
+      var myStyle =[
+        {
+          featureType: "landscape",
+          elementType: "all",
+          stylers: [
+            { hue: "#ffa200" },
+            { lightness: -20 }
+          ]
+        },{
+          featureType: "water",
+          elementType: "all",
+          stylers: [
+            { hue: "#ff9100" },
+            { lightness: 52 }
+          ]
+        },{
+          featureType: "administrative",
+          elementType: "labels",
+          stylers: [
+            { hue: "#1100ff" },
+            { saturation: -100 },
+            { lightness: -18 }
+          ]
+        },{
+          featureType: "poi",
+          elementType: "all",
+          stylers: [
+            { lightness: -18 },
+            { visibility: "off" }
+          ]
+        },{
+          featureType: "landscape",
+          elementType: "all",
+          stylers: [
+            { visibility: "off" }
+          ]
+        },{
+          featureType: "water",
+          elementType: "labels",
+          stylers: [
+            { lightness: -18 },
+            { visibility: "off" }
+          ]
+        },{
+          featureType: "road",
+          elementType: "labels",
+          stylers: [
+            { visibility: "off" }
+          ]
+        },{
+          featureType: "administrative",
+          elementType: "geometry",
+          stylers: [
+            { visibility: "simplified" }
+          ]
+        },{
+          featureType: "road.highway",
+          elementType: "geometry",
+          stylers: [
+            { saturation: -100 }
+          ]
+        },{
+          featureType: "road.arterial",
+          elementType: "geometry",
+          stylers: [
+            { saturation: -100 }
+          ]
+        },{
+          featureType: "road.local",
+          elementType: "geometry",
+          stylers: [
+            { lightness: -27 }
+          ]
+        },{
+          featureType: "transit",
+          elementType: "all",
+          stylers: [
+            { visibility: "off" }
+          ]
+        }
+      ];
+
+      let map;
+      var markers=[];
+
+      function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+          mapTypeControlOptions: {
+              mapTypeIds: ['mystyle', google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.TERRAIN]
+          },
+          zoom: 5,
+          center: new google.maps.LatLng(19.432608, -99.133209),
+          mapTypeId: 'mystyle'
+        });
+
+        map.mapTypes.set('mystyle', new google.maps.StyledMapType(myStyle, { name: 'My Style' }));
+
+        // Create a <script> tag and set the USGS URL as the source.
+        const script = document.createElement("script");
+        // This example uses a local copy of the GeoJSON stored at
+        // http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojsonp
+        //script.src ="http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojsonp";
+
+        //console.log(script);
+
+        var res=httpGet("https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/mining_reports.json");
+
+        //console.log(res);
+        var obj=JSON.parse(res);
+        //console.log(obj);
+        //document.getElementsByTagName("head")[0].appendChild(script);
+        eqfeed_callback(obj);
+
+        var refresh = document.getElementById("refresh");
+        google.maps.event.addDomListener(refresh, "click", refreshMap);
+
+        refreshMap();
+      }
+
+      // Customizing markers by map features
+      var icons = {};
+
+
+      // Loop through the results array and place a marker for each
+      // set of coordinates.
+      const eqfeed_callback = function (results) {
+        for (let i = 0; i < results.features.length; i++) {
+          const coords = results.features[i].geometry.coordinates;
+
+          var location=results.features[i];
+          var tag;
+
+
+
+          //console.log(icons[tag].icon);
+
+          const latLng = new google.maps.LatLng(coords[1], coords[0]);
+          const marker=new google.maps.Marker({
+            position: latLng,
+            map: map,
+            icon: 'https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Prospector_3D%20Logo_Icon_ico32.ico',
+            //fillColor: 'green'
+          });
+
+          const prop=location.properties;
+          var contentString="";
+
+          if(prop!=null){
+             contentString =
+                    '<img src="https://static.wixstatic.com/media/af6ea5_7af36e8617e2483ebd2ccce4ca066868~mv2.png/v1/fill/w_236,h_80,al_c,q_85,usm_0.66_1.00_0.01/Screen%20Shot%202020-06-03%20at%209_15_10%20PM.webp">'+
+                    '<div id="content">' +
+                    '<div id="siteNotice">' +
+                    '</div>' +
+                    '<h3 id="firstHeading" class="firstHeading">'+prop.Name+'  -  '+prop.Prospector_Report_ID+'</h3>' +
+                    '<div id="bodyContent">' +
+                    "<p><b>"+prop.Geography+" - "+prop.Company+
+                    "<br><br>Qualified Authors: "+prop.Qualified_Author_s_+" <br>"+
+                    '<br><br>Search Link : <a href="'+prop.url+'">' +
+                    prop.Search_Link+'</a>' +
+                    "</div>" +
+                    "</div>";
+          }else{
+              contentString ='<div id="content">' +
+              '<div id="siteNotice">' +
+              "</div>" +
+              '<h1 id="firstHeading" class="firstHeading"> Sitename: Sitename  - department id </h1>' +
+
+              "</div>" +
+              "</div>";
+          }
+
+        const infowindow = new google.maps.InfoWindow({
+            content: contentString,
+        });
+
+        marker.addListener("click", () => {
+            infowindow.open(map, marker);
+        });
+
+        markers.push([marker,prop.mineral_tags,prop.country,prop.state]);
+
+        }
+      };
+
+      function httpGet(theUrl){
+          var xmlHttp = new XMLHttpRequest();
+          xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+          xmlHttp.send( null );
+          return xmlHttp.responseText;
+      };
+
+      // ******   new methods
+
+      // Sets the map on all markers in the array.
+      function setMapOnAll(map) {
+        for (let i = 0; i < markers.length; i++) {
+          markers[i][0].setMap(map);
+        }
+      }
+
+      // Shows any markers currently in the array.
+      function showMarkers() {
+        setMapOnAll(map);
+      }
+
+      // modify to process all marker attributes and update using fields
+      function refreshMap() { // clear markers and update with inputs
+          console.log("refreshing map");
+
+          var zoom = document.getElementById("zoom");
+          var zoom_level = zoom.options[zoom.selectedIndex].value;
+
+          console.log("zoom level: "+zoom_level);
+
+          var country_obj = document.getElementById("country");
+          var country = country_obj.options[country_obj.selectedIndex].value;
+
+          console.log("displayed country: "+country);
+
+          var state_obj = document.getElementById("state");
+          var state = state_obj.options[state_obj.selectedIndex].value;
+
+          console.log("selected mineral: "+state);
+
+          var minerals_obj = document.getElementById("mineral");
+          var mineral = minerals_obj.options[minerals_obj.selectedIndex].value;
+
+          console.log("selected mineral: "+mineral);
+
+          var central_lat=document.getElementById('center_lat').value;
+          var central_long=document.getElementById('center_long').value;
+
+          console.log("centre coords :  "+typeof(central_lat)+"     "+central_long);
+
+          // Update fields
+
+          // *** zoom
+          if(zoom_level>0){
+            var z=(Number(zoom_level));
+            map.setZoom(z);
+          }
+          // *** set center
+          if(central_lat!=""  && central_long!=""){
+              var lat=Number(central_lat);
+              var long=Number(central_long);
+              console.log("*** New center :"+lat+", "+long);
+              map.setCenter(new google.maps.LatLng(lat, long));
+          }
+
+          console.log("Zoom level: "+map.zoom);
+
+          if(country=="Mexico"){
+            console.log("adding Mexico");
+            var res=httpGet("https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/mexico_tags.json");
+
+            //console.log(res);
+            var obj=JSON.parse(res);
+
+            //console.log(obj);
+            //document.getElementsByTagName("head")[0].appendChild(script);
+            eqfeed_callback(obj);
+          }else if(country=="USA"){
+            console.log("Adding USA");
+            var res=httpGet("https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/usa_test_tags_2000.json");
+
+            //console.log(res);
+            var obj=JSON.parse(res);
+            //console.log(obj);
+            //document.getElementsByTagName("head")[0].appendChild(script);
+            eqfeed_callback(obj);
+          }else if(country=="Canada"){
+            console.log("Adding Canada");
+            var res=httpGet("https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/canada_tags.json");
+
+            //console.log(res);
+            var obj=JSON.parse(res);
+            //console.log(obj);
+            //document.getElementsByTagName("head")[0].appendChild(script);
+            eqfeed_callback(obj);
+
+          }
+
+          // filter out minerals
+          for(let i = 0; i < markers.length; i++){
+              //console.log("Mineral array: "+markers[i][1]);
+              //console.log("Selected mineral: "+mineral);
+              //console.log("country: "+markers[i][2]);
+              if(mineral=="All"){
+                  // place on map, visible
+                  //console.log("Mineral: All");
+                  markers[i][0].setMap(map);
+
+                  if(country=="USA" && markers[i][2]=="United States"){
+                    console.log("State: "+markers[i][3]+"   state field: "+state);
+                    if(state==markers[i][3]){
+
+                        markers[i][0].setMap(map);
+                    }else{
+                        markers[i][0].setMap(null);
+                    }
+                  }
+              }
+              else if(markers[i][1].includes(mineral.toLowerCase()) && markers[i][2]=="United States"){// add state condition
+                  //console.log("toggle: "+mineral);
+                  // place on map, visible
+                  console.log("State: "+markers[i][3]+"   state field: "+state);
+                  if(state==markers[i][3]){
+                      markers[i][0].setMap(map);
+                  }else{
+                      markers[i][0].setMap(null);
+                  }
+
+              }
+              else if(markers[i][1].includes(mineral.toLowerCase())){
+                  //console.log("toggle: "+mineral);
+                  // place on map, visible
+                  markers[i][0].setMap(map);
+              }else{
+                  markers[i][0].setMap(null);
+              }
+          }
+      }
+
+      // Removes the markers from the map, but keeps them in the array.
+      function clearMarkers() {
+        setMapOnAll(null);
+      }
+
+      // Deletes all markers in the array by removing references to them.
+      function deleteMarkers() {
+        clearMarkers();
+        markers = [];
+      }
+
+
+    </script>
+  </p>
+  </head>
+
+
+
+  <body>
+    <h1>Mining Reports 43-101 Map<br></h1>
+    <div id="map"></div>
+
+    <div id="inline-actions">
+      <span>Zoom level:
+        <select id="zoom">
+          <option value="5">Default</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+          <option value="11">11</option>
+          <option value="12">12</option>
+        </select>
+      </span>
+      <span>Country:
+        <select id="country">
+          <option value="None">None</option>
+          <option value="Mexico">Mexico</option>
+          <option value="USA">USA</option>
+          <option value="Canada">Canada</option>
+        </select>
+      </span>
+      <span>State (US only):
+        <select id="state">
+          <option value="None">None</option>
+          <option value="Alabama">Alabama</option>
+          <option value="Alaska">Alaska</option>
+          <option value="Arizona">Arizona</option>
+          <option value="Arkansas">Arkansas</option>
+          <option value="California">California</option>
+          <option value="Colorado">Colorado</option>
+          <option value="Connecticut">Connecticut</option>
+          <option value="Delaware">Delaware</option>
+          <option value="Florida">Florida</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Hawaii">Hawaii</option>
+          <option value="Idaho">Idaho</option>
+          <option value="Illinois">Illinois</option>
+          <option value="Indiana">Indiana</option>
+          <option value="Iowa">Iowa</option>
+          <option value="Kansas">Kansas</option>
+          <option value="Kentucky">Kentucky</option>
+          <option value="Louisiana">Lousiana</option>
+          <option value="Maine">Maine</option>
+          <option value="Maryland">Maryland</option>
+          <option value="Massachusetts">Massachusetts</option>
+          <option value="Michigan">Michigan</option>
+          <option value="Minnesota">Minnesota</option>
+          <option value="Mississipi">Mississipi</option>
+          <option value="Missouri">Missouri</option>
+          <option value="Montana">Montana</option>
+          <option value="Nebraska">Nebraska</option>
+          <option value="Nevada">Nevada</option>
+          <option value="New Hampshire">New Hampshire</option>
+          <option value="New Jersey">New Jersey</option>
+          <option value="New Mexico">New Mexico</option>
+          <option value="New York">New York</option>
+          <option value="North Dakota">North Dakota</option>
+          <option value="North Carolina">North Carolina</option>
+          <option value="Ohio">Ohio</option>
+          <option value="Oklahoma">Oklahoma</option>
+          <option value="Oregon">Oregon</option>
+          <option value="Pennsylvania">Pennsylvania</option>
+          <option value="Rhode Island">Rhode Island</option>
+          <option value="South Carolina">South Carolina</option>
+          <option value="South Dakota">South Dakota</option>
+          <option value="Tennessee">Tennessee</option>
+          <option value="Texas">Texas</option>
+          <option value="Utah">Utah</option>
+          <option value="Vermont">Vermont</option>
+          <option value="Virginia">Virginia</option>
+          <option value="Washington">Washington</option>
+          <option value="West Virginia">West Virginia</option>
+          <option value="Wisconsin">Wisconsin</option>
+          <option value="Wyoming">Wyoming</option>
+        </select>
+      </span>
+      <span>Mineral:
+        <select id="mineral">
+          <option value="All">All</option>
+          <option value="Gold">Gold</option>
+          <option value="Copper">Copper</option>
+        </select>
+      </span>
+      <label for="center_lat"> Center lat:</label><input type="number" id="center_lat" name="latitude" style="width: 50px;">
+      <label for="center_long"> Center long:</label><input type="number" id="center_long" name="longitude" style="width: 50px;">
+      <input id="refresh" type="button"  onclick="refreshMap();" value="Refresh Map">
+      <input onclick="clearMarkers();" type="button" value="Hide Markers" />
+      <input onclick="showMarkers();" type="button" value="Show All Markers" />
+      <input onclick="deleteMarkers();" type="button" value="Delete Markers" />
+    </div>
+
+
+  </body>
+</html>
