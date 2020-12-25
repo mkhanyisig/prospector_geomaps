@@ -1,0 +1,2433 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Combined Tootltip GeoMap</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+  <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjl3X5q6XmuETXG8wNyCUb2kOD0IK9PNE&callback=initMap"></script>
+
+  <style type="text/css">
+    /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+    #map {
+      height: 90%;
+      width: 90%;
+    }
+
+    /* Optional: Makes the sample page fill the window. */
+    html,
+    body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 5;
+    }
+  </style>
+
+  <!--
+  tooltip styling
+  <link rel="stylesheet" href="css/prospector-map-usgs-mr-data-pop-up.css" />
+  -->
+
+  <link rel="stylesheet" type="text/css" href="https://gitcdn.link/repo/mkhanyisig/RandomCodeSamples/master/CSS%20Files/prospector-map-usgs-mr-data-pop-up.css" />
+
+  <style>
+    @font-face {
+      font-family: "Gotham-Bold";
+      src: url("https://anima-uploads.s3.amazonaws.com/5d3af30ddbae7e23db47c15c/Gotham Book.otf") format("opentype");
+    }
+
+    @font-face {
+      font-family: "Gotham-Book";
+      src: url("https://anima-uploads.s3.amazonaws.com/5d3af30ddbae7e23db47c15c/Gotham Book.otf") format("opentype");
+    }
+    .anima-component-wrapper a,
+    .anima-screen a {
+      text-decoration: none;
+      display: contents;
+    }
+
+    .anima-full-width-a {
+      width: 100%;
+    }
+
+    .anima-full-height-a {
+      height: 100%;
+    }
+
+    .anima-screen textarea:focus,
+    .anima-screen input:focus {
+      outline: none;
+    }
+
+    .anima-screen *,
+    .anima-component-wrapper * {
+      box-sizing: border-box;
+    }
+
+    .anima-screen div {
+      -webkit-text-size-adjust: none;
+    }
+
+    .anima-container-center-vertical,
+    .anima-container-center-horizontal {
+      pointer-events: none;
+      display: flex;
+      flex-direction: row;
+      padding: 0;
+      margin: 0;
+    }
+
+    .anima-container-center-vertical {
+      align-items: center;
+      height: 100%;
+    }
+
+    .anima-container-center-horizontal {
+      justify-content: center;
+      width: 100%;
+    }
+
+    .anima-container-center-vertical > *,
+    .anima-container-center-horizontal > * {
+      pointer-events: auto;
+      flex-shrink: 0;
+    }
+
+    .anima-component-wrapper,
+    .anima-screen {
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      word-break: break-all;
+      word-break: break-word;
+    }
+
+    .anima-auto-animated div {
+      opacity: 0;
+      position: absolute;
+      --anima-z-index: -1;
+    }
+
+    .anima-auto-animated .anima-container-center-vertical,
+    .anima-auto-animated .anima-container-center-horizontal {
+      opacity: 1;
+    }
+
+    .anima-overlay {
+      position: absolute;
+      opacity: 0;
+      display: none;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      position: fixed;
+    }
+
+    .anima-animate-appear {
+      opacity: 0;
+      display: block;
+      animation: anima-reveal 0.3s ease-in-out 1 normal forwards;
+    }
+
+    .anima-animate-disappear {
+      opacity: 1;
+      display: block;
+      animation: anima-reveal 0.3s ease-in-out 1 reverse forwards;
+    }
+
+    .anima-animate-nodelay {
+      animation-delay: 0s;
+    }
+
+    @keyframes anima-reveal {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    .align-self-flex-start {
+      align-self: flex-start;
+    }
+    .align-self-flex-end {
+      align-self: flex-end;
+    }
+    .align-self-flex-center {
+      align-self: center;
+    }
+    .anima-valign-text-middle {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .anima-valign-text-bottom {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .anima-component-wrapper,
+    .anima-component-wrapper * {
+      pointer-events: none;
+    }
+
+    .anima-component-wrapper a *,
+    .anima-component-wrapper a,
+    .anima-component-wrapper input,
+    .anima-component-wrapper video,
+    .anima-component-wrapper iframe,
+    .anima-listeners-active,
+    .anima-listeners-active * {
+      pointer-events: auto;
+    }
+
+    .anima-hidden,
+    .anima-hidden * {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .anima-smart-layers-pointers,
+    .anima-smart-layers-pointers * {
+      pointer-events: auto;
+      visibility: visible;
+    }
+
+    .anima-component-wrapper.anima-not-ready,
+    .anima-component-wrapper.anima-not-ready * {
+      visibility: hidden !important;
+    }
+
+    .anima-listeners-active-click,
+    .anima-listeners-active-click * {
+      cursor: pointer;
+    }
+  </style>
+
+  <!--
+  <link rel="stylesheet" type="text/css" href="css/artboard-1.css" />
+  <link rel="stylesheet" type="text/css" href="https://gitcdn.link/repo/mkhanyisig/RandomCodeSamples/master/CSS%20Files/artboard-1.css" />
+  -->
+
+  <link rel="stylesheet" type="text/css" href="https://gitcdn.link/repo/mkhanyisig/RandomCodeSamples/master/CSS%20Files/artboard-1.css" />
+
+
+  <style>
+    @font-face {
+      font-family: "Gotham-Book";
+      src: url("https://anima-uploads.s3.amazonaws.com/5d3af30ddbae7e23db47c15c/Gotham Book.otf") format("opentype");
+    }
+
+    @font-face {
+      font-family: "Gotham-Bold";
+      src: url("https://anima-uploads.s3.amazonaws.com/5d3af30ddbae7e23db47c15c/Gotham Book.otf") format("opentype");
+    }
+    .anima-component-wrapper a,
+    .anima-screen a {
+      text-decoration: none;
+      display: contents;
+    }
+
+    .anima-full-width-a {
+      width: 100%;
+    }
+
+    .anima-full-height-a {
+      height: 100%;
+    }
+
+    .anima-screen textarea:focus,
+    .anima-screen input:focus {
+      outline: none;
+    }
+
+    .anima-screen *,
+    .anima-component-wrapper * {
+      box-sizing: border-box;
+    }
+
+    .anima-screen div {
+      -webkit-text-size-adjust: none;
+    }
+
+    .anima-container-center-vertical,
+    .anima-container-center-horizontal {
+      pointer-events: none;
+      display: flex;
+      flex-direction: row;
+      padding: 0;
+      margin: 0;
+    }
+
+    .anima-container-center-vertical {
+      align-items: center;
+      height: 100%;
+    }
+
+    .anima-container-center-horizontal {
+      justify-content: center;
+      width: 100%;
+    }
+
+    .anima-container-center-vertical > *,
+    .anima-container-center-horizontal > * {
+      pointer-events: auto;
+      flex-shrink: 0;
+    }
+
+    .anima-component-wrapper,
+    .anima-screen {
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      word-break: break-all;
+      word-break: break-word;
+    }
+
+    .anima-auto-animated div {
+      opacity: 0;
+      position: absolute;
+      --anima-z-index: -1;
+    }
+
+    .anima-auto-animated .anima-container-center-vertical,
+    .anima-auto-animated .anima-container-center-horizontal {
+      opacity: 1;
+    }
+
+    .anima-overlay {
+      position: absolute;
+      opacity: 0;
+      display: none;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      position: fixed;
+    }
+
+    .anima-animate-appear {
+      opacity: 0;
+      display: block;
+      animation: anima-reveal 0.3s ease-in-out 1 normal forwards;
+    }
+
+    .anima-animate-disappear {
+      opacity: 1;
+      display: block;
+      animation: anima-reveal 0.3s ease-in-out 1 reverse forwards;
+    }
+
+    .anima-animate-nodelay {
+      animation-delay: 0s;
+    }
+
+    @keyframes anima-reveal {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    .align-self-flex-start {
+      align-self: flex-start;
+    }
+    .align-self-flex-end {
+      align-self: flex-end;
+    }
+    .align-self-flex-center {
+      align-self: center;
+    }
+    .anima-valign-text-middle {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .anima-valign-text-bottom {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .anima-component-wrapper,
+    .anima-component-wrapper * {
+      pointer-events: none;
+    }
+
+    .anima-component-wrapper a *,
+    .anima-component-wrapper a,
+    .anima-component-wrapper input,
+    .anima-component-wrapper video,
+    .anima-component-wrapper iframe,
+    .anima-listeners-active,
+    .anima-listeners-active * {
+      pointer-events: auto;
+    }
+
+    .anima-hidden,
+    .anima-hidden * {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .anima-smart-layers-pointers,
+    .anima-smart-layers-pointers * {
+      pointer-events: auto;
+      visibility: visible;
+    }
+
+    .anima-component-wrapper.anima-not-ready,
+    .anima-component-wrapper.anima-not-ready * {
+      visibility: hidden !important;
+    }
+
+    .anima-listeners-active-click,
+    .anima-listeners-active-click * {
+      cursor: pointer;
+    }
+
+    /* Just use .gm-style-iw
+    .gm-style-iw {
+        padding-right: 0px;
+        padding-bottom: 0px;
+        width: 700px;
+        max-width: 200;
+        max-height: 200px;
+    }
+    */
+
+    .gm-style-iw .gm-style-iw-c {
+      padding-right: 0px;
+      padding-bottom: 0px;
+      width: 700px;
+      max-width: 900px;
+      max-height: 900px;
+   }
+
+  </style>
+
+
+
+  <!--
+    Tooltip variables
+  -->
+
+  <script type="text/javascript">
+  var txt="";
+
+  var tipname="Lajitas";
+  var reporter_s="Fischer, Richard P., Staude, John-Mark G.";
+  var state = "Chihuah";
+  var country = "Mexico";
+  var dev_state = "Occurrence";
+  var dep_id = "10008156";
+  var data_id= "D000120";
+  var commodity = "Lead";
+  var nm="Updated Feasibility Study (GGI, GGII, Kao, Rambo &amp; Nami Deposits) and a Preliminary Economic Assessment (North Kao Deposit) for the Karma Gold Project";
+  var company = "Endeavour Mining Corporation";
+  var report_date = "Friday, December 5, 2014";
+  var mineral = "Gold";
+  var resource_estimate= "Inferred Mineral Resource, Indicated Mineral Resource, Probable Mineral Reserve";
+  var authors = "Eugene Puritch, P.Eng.; Richard Sutcliffe, Ph.D., P. Geo.; Antoine Yassa, P.Geo.; Ismail Mahomed,Pr. Sci. Nat.; Peter Terbrugge, Pr. Sci. Nat.; Duncan John Grant-Stuart, Pr. Eng.; Martin Stapinsky,Ph.D., P. Geo.; Neil Senior, MSc. Mech.Eng FSAIMM";
+  var deposit_type= "Mesothermal, shear-hosted gold deposits associated with orogenic activity";
+  </script>
+
+  </script>
+  <script type="text/javascript">
+  var image_line6 = "img/line-6@1x.png";
+  var image_line7 = "img/line-7@1x.png";
+  var image_line8 = "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/Images/line-8-1%401x.png";
+  var image_rect12 = "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/Images/rectangle-12%401x.png";
+  var image12 = 'https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/Images/image-12%401x.png';
+  var image12b = "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/Images/rectangle-12%401x.png";
+  var logo="https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/Images/prospector-3d-logo-icon%401x.png";
+  var machine_learning_logo = "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/Images/machine-learning%401x.png";
+  var download_img_link = "https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/Images/download--2-%401x.png";
+  var download_link ="https://43-101.com/";
+  var ai_insights = "https://43-101.com/results.php?sort=1&resultsPerPage=100&datasource=PRSPRM&extended=1&report=ac89fb3b7a08deb0236f8092ad2dc4b0";
+  var url= "https://www.prospectorportal.com/";
+
+  function update_USGS_Tip(){
+    txt = "<div class='prospector-map-usgs-mr-data-pop-up anima-screen'>"+
+      "<div class='usgs-data--oint-popup-C61RwL'>"+
+        "<img class='ellipse-2-C61RwL' src='"+image_rect12+"' />"+
+        "<div class='x144900-vkW8Bg font-class-2'>"+tipname+"</div>"+
+        "<div class='group-17-vkW8Bg'>"+
+        "</div>"+
+        "<div class='reporterfi-ohn-mark-g-vkW8Bg font-class-1'>"+
+          "<span class='span0-9q6NIR'>Reporter</span><span class='span1-9q6NIR'><br />"+reporter_s+"</span>"+
+        "</div>"+
+        "<div class='group-23-vkW8Bg'>"+
+          "<div class='statechihuahua-XShmeK font-class-1'>"+
+            "<span class='span0-gnrdYy'>State<br /></span><span class='span1-gnrdYy'>"+state+"</span>"+
+          "</div>"+
+          "<div class='countrymexico-XShmeK font-class-1'>"+
+            "<span class='span0-zuXaZw'>Country<br /></span><span class='span1-zuXaZw'>"+country+"<br /></span>"+
+          "</div>"+
+        "</div>"+
+        "<div class='group-24-vkW8Bg'>"+
+          "<div class='developmen-occurrence-uByZ7O font-class-1'>"+
+            "<span class='span0-XTTW9O'>Development State<br /></span>"+
+            "<span class='span1-XTTW9O'>"+dev_state+"<br /></span>"+
+          "</div>"+
+          "<div class='deposit-id10008156-uByZ7O font-class-1'>"+
+            "<span class='span0-Jy8yAW'>Deposit ID<br /></span><span class='span1-Jy8yAW'>"+dep_id+"<br /></span>"+
+          "</div>"+
+          "<div class='mr-data-idd000120-uByZ7O font-class-1'>"+
+            "<span class='span0-W1uKTk'>MR Data ID<br /></span><span class='span1-W1uKTk'>"+data_id+"<br /></span>"+
+          "</div>"+
+        "</div>"+
+        "<div class='group-22-vkW8Bg'>"+
+          "<div class='commodityl-y-vanadium-9hQotL font-class-1'>"+
+            "<span class='span0-rGZswo'>Commodity<br /></span><span class='span1-rGZswo'>"+commodity+"</span>"+
+          "</div>"+
+        "</div>"+
+        "<img class='line-8-vkW8Bg' src='"+image_line8+"' />"+
+        "<div class='group-20-vkW8Bg'>"+
+          "<div class='viewdetails-VZzrf3 font-class-2'>"+"<a href='"+url+"'>View <br />Details</div>"+
+        "</div>"+
+        "<div class='mask-group-8-vkW8Bg'><img class='image-13-s2h2t7' src='"+image12+"' /></div>"+
+      "</div></div>";
+
+  }
+
+  //console.log(txt);
+
+  //var element = document.getElementById("tag");
+
+  //console.log(element);
+
+  //element.innerHTML = txt;
+
+  </script>
+
+  <script type="text/javascript">
+  function update_43_Tip(){
+    txt="<div class='artboard-1 anima-screen'>"+
+        "<div class='x43-101-report-pop-up-C61RwL'>"+
+        "<img class='rectangle-12-i9LdvS' src='"+image12b+"' />"+
+        "<div class='x144900-i9LdvS font-class-2'>"+
+          nm+
+          "<br /></div>"+
+        "<img class='prospector--logo-icon-i9LdvS' src='"+logo+"' />"+
+        "<div class='qualified--r-m-sc-mec-i9LdvS font-class-1'>"+
+          "<span class='span0-Em9OAf'>Qualified Author(s)</span><span class='span1-Em9OAf'><br />"+authors+"</span>"+
+        "</div>"+
+        "<div class='companyend-orporation-i9LdvS font-class-1'>"+
+          "<span class='span0-hwNHS6'>Company<br /></span><span class='span1-hwNHS6'>"+
+          company+"</span>"+
+        "</div>"+
+        "<div class='group-18-i9LdvS'>"+
+          "<div class='report-dat-ber-5-2014-Hd0stf font-class-1'>"+
+            "<span class='span0-rYeIFy'>Report Date<br /></span><span class='span1-rYeIFy'>"+
+            report_date+"<br /></span>"+
+          "</div>"+
+          "<div class='mineralgold-Hd0stf font-class-1'>"+
+            "<span class='span0-ILpmox'>Mineral<br /></span><span class='span1-ILpmox'>"+mineral+"<br /></span>"+
+          "</div>"+
+          "<div class='geographyb-rkina-faso-Hd0stf font-class-1'>"+
+            "<span class='span0-RFWSKl'>Geography<br /></span><span class='span1-RFWSKl'>"+country+"<br /></span>"+
+          "</div>"+
+        "</div>"+
+        "<div class='group-19-i9LdvS'>"+
+          "<div class='deposit-ty-c-activity-Bp1hwL font-class-1'>"+
+            "<span class='span0-E4tYQ1'>Deposit Type</span><span class='span1-E4tYQ1'><br />"+deposit_type+
+            "<br/></span>"+
+          "</div>"+
+          "<div class='mineral-re-al-reserve-Bp1hwL font-class-1'>"+
+            "<span class='span0-uDOLLm'>Mineral Resource</span><span class='span1-uDOLLm'> </span><span class='span2-uDOLLm'>Estimate<br /></span><span class='span3-uDOLLm'>"+
+            resource_estimate+"</span>"+
+          "</div>"+
+        "</div>"+
+        "<img class='line-8-i9LdvS' src='"+image_line8 +"' />"+
+        "<div class='group-21-i9LdvS'>"+
+          "<img class='machine-learning-chgx9D' src='"+machine_learning_logo+"' />"+
+          "<div class='view-prosp-rai-sights-chgx9D font-class-2'><a class='view-prosp-rai-sights-chgx9D font-class-2' href='"+ai_insights+"' target='_blank'>View Prospector<br />AI Sights</a></div>"+
+        "</div>"+
+        "<div class='group-20-i9LdvS'>"+
+          "<img class='download-2-0UnOZs' src='"+download_img_link+"' />"+
+          "<div class='downloadre-t-document-0UnOZs font-class-2'> <a class='downloadre-t-document-0UnOZs font-class-2' href='"+download_link+"'> Download<br/>Report Document </a></div>"+
+        "</div>"+
+      "</div>"+
+    "</div>";
+
+  };
+
+  </script>
+
+</head>
+
+<body>
+  <div id="map"></div>
+
+  <div id="inline-actions">
+    <span> Mineral:
+      <select id="mineral">
+        <option value='All'>All</option>
+        <option value='abrasive'>ABRASIVE</option>
+        <option value='aggregate'>AGGREGATE</option>
+        <option value='alabaster'>ALABASTER</option>
+        <option value='aluminum'>ALUMINUM</option>
+        <option value='alunite'>ALUNITE</option>
+        <option value='andalusite'>ANDALUSITE</option>
+        <option value='anthracite'>ANTHRACITE</option>
+        <option value='antimony'>ANTIMONY</option>
+        <option value='arsenic'>ARSENIC</option>
+        <option value='asbestos'>ASBESTOS</option>
+        <option value='ash'>ASH</option>
+        <option value='ballclay'>BALLCLAY</option>
+        <option value='barite'>BARITE</option>
+        <option value='barium'>BARIUM</option>
+        <option value='barium-barite'>BARIUM-BARITE</option>
+        <option value='bentonite'>BENTONITE</option>
+        <option value='beryllium'>BERYLLIUM</option>
+        <option value='bismuth'>BISMUTH</option>
+        <option value='bituminous'>BITUMINOUS</option>
+        <option value='bloatingmaterial'>BLOATINGMATERIAL</option>
+        <option value='boron'>BORON</option>
+        <option value='boron-borates'>BORON-BORATES</option>
+        <option value='brickclay'>BRICKCLAY</option>
+        <option value='bromine'>BROMINE</option>
+        <option value='cadmium'>CADMIUM</option>
+        <option value='calcium'>CALCIUM</option>
+        <option value='carbondioxide'>CARBONDIOXIDE</option>
+        <option value='carnallite'>CARNALLITE</option>
+        <option value='cementrock'>CEMENTROCK</option>
+        <option value='cerium'>CERIUM</option>
+        <option value='cesium'>CESIUM</option>
+        <option value='chalcopyrite'>CHALCOPYRITE</option>
+        <option value='chlorine'>CHLORINE</option>
+        <option value='chlorite'>CHLORITE</option>
+        <option value='chromite'>CHROMITE</option>
+        <option value='chromium'>CHROMIUM</option>
+        <option value='clay'>CLAY</option>
+        <option value='coal'>COAL</option>
+        <option value='cobalt'>COBALT</option>
+        <option value='construction'>CONSTRUCTION</option>
+        <option value='containedormetal'>CONTAINEDORMETAL</option>
+        <option value='copper'>COPPER</option>
+        <option value='copperoxide'>COPPEROXIDE</option>
+        <option value='coppersulfide'>COPPERSULFIDE</option>
+        <option value='corundum'>CORUNDUM</option>
+        <option value='crushed/broken'>CRUSHED/BROKEN</option>
+        <option value='crushedrockaggregate'>CRUSHEDROCKAGGREGATE</option>
+        <option value='diamond'>DIAMOND</option>
+        <option value='diatomite'>DIATOMITE</option>
+        <option value='dimension'>DIMENSION</option>
+        <option value='dolomite'>DOLOMITE</option>
+        <option value='emerald'>EMERALD</option>
+        <option value='emery'>EMERY</option>
+        <option value='feldspar'>FELDSPAR</option>
+        <option value='ferrochrome'>FERROCHROME</option>
+        <option value='ferromanganese'>FERROMANGANESE</option>
+        <option value='ferrosilicon'>FERROSILICON</option>
+        <option value='fireclay(refractory)'>FIRECLAY(REFRACTORY)</option>
+        <option value='flagstone'>FLAGSTONE</option>
+        <option value='flint'>FLINT</option>
+        <option value='fluorine-fluorite'>FLUORINE-FLUORITE</option>
+        <option value='fluorite'>FLUORITE</option>
+        <option value='free'>FREE</option>
+        <option value='fullersearth'>FULLERSEARTH</option>
+        <option value='galena'>GALENA</option>
+        <option value='gallium'>GALLIUM</option>
+        <option value='garnet'>GARNET</option>
+        <option value='gemstone'>GEMSTONE</option>
+        <option value='general'>GENERAL</option>
+        <option value='geothermal'>GEOTHERMAL</option>
+        <option value='germanium'>GERMANIUM</option>
+        <option value='gilsonite'>GILSONITE</option>
+        <option value='gold'>GOLD</option>
+        <option value='granite'>GRANITE</option>
+        <option value='graphite'>GRAPHITE</option>
+        <option value='gypsum-anhydrite'>GYPSUM-ANHYDRITE</option>
+        <option value='hafnium'>HAFNIUM</option>
+        <option value='halite'>HALITE</option>
+        <option value='halloysite'>HALLOYSITE</option>
+        <option value='hectorite'>HECTORITE</option>
+        <option value='helium'>HELIUM</option>
+        <option value='highaluminaclay'>HIGHALUMINACLAY</option>
+        <option value='highcalcium'>HIGHCALCIUM</option>
+        <option value='indium'>INDIUM</option>
+        <option value='industrial'>INDUSTRIAL</option>
+        <option value='industrial/fracsand'>INDUSTRIAL/FRACSAND</option>
+        <option value='iodine'>IODINE</option>
+        <option value='iridium'>IRIDIUM</option>
+        <option value='iron'>IRON</option>
+        <option value='iron-pyrite'>IRON-PYRITE</option>
+        <option value='ironoxidepigments'>IRONOXIDEPIGMENTS</option>
+        <option value='jade'>JADE</option>
+        <option value='kainite'>KAINITE</option>
+        <option value='kaolin'>KAOLIN</option>
+        <option value='kaolinite'>KAOLINITE</option>
+        <option value='kyanite'>KYANITE</option>
+        <option value='lead'>LEAD</option>
+        <option value='lightweight'>LIGHTWEIGHT</option>
+        <option value='lignite'>LIGNITE</option>
+        <option value='limestone'>LIMESTONE</option>
+        <option value='lithium'>LITHIUM</option>
+        <option value='magnesite'>MAGNESITE</option>
+        <option value='magnesium'>MAGNESIUM</option>
+        <option value='magnesiumcompounds'>MAGNESIUMCOMPOUNDS</option>
+        <option value='magnetite'>MAGNETITE</option>
+        <option value='manganese'>MANGANESE</option>
+        <option value='marble'>MARBLE</option>
+        <option value='mercury'>MERCURY</option>
+        <option value='metal'>METAL</option>
+        <option value='mica'>MICA</option>
+        <option value='millconcentrate'>MILLCONCENTRATE</option>
+        <option value='mineralpigments'>MINERALPIGMENTS</option>
+        <option value='molybdenite'>MOLYBDENITE</option>
+        <option value='molybdenum'>MOLYBDENUM</option>
+        <option value='montmorillonite'>MONTMORILLONITE</option>
+        <option value='naturalgas'>NATURALGAS</option>
+        <option value='nickel'>NICKEL</option>
+        <option value='nickellaterite'>NICKELLATERITE</option>
+        <option value='niobium'>NIOBIUM</option>
+        <option value='niobium(columbium)'>NIOBIUM(COLUMBIUM)</option>
+        <option value='nitrogen-nitrates'>NITROGEN-NITRATES</option>
+        <option value='oilsands'>OILSANDS</option>
+        <option value='oilshale'>OILSHALE</option>
+        <option value='olivine'>OLIVINE</option>
+        <option value='osmium'>OSMIUM</option>
+        <option value='palladium'>PALLADIUM</option>
+        <option value='peat'>PEAT</option>
+        <option value='pegmatite'>PEGMATITE</option>
+        <option value='perlite'>PERLITE</option>
+        <option value='petroleum(oil)'>PETROLEUM(OIL)</option>
+        <option value='pge'>PGE</option>
+        <option value='phosphate'>PHOSPHATE</option>
+        <option value='phosphorus'>PHOSPHORUS</option>
+        <option value='phosphorus-phosphates'>PHOSPHORUS-PHOSPHATES</option>
+        <option value='pigiron'>PIGIRON</option>
+        <option value='pigment'>PIGMENT</option>
+        <option value='platinum'>PLATINUM</option>
+        <option value='platinum-groupelements(pge)'>PLATINUM-GROUPELEMENTS(PGE)</option>
+        <option value='polyhalite'>POLYHALITE</option>
+        <option value='potash'>POTASH</option>
+        <option value='potassium'>POTASSIUM</option>
+        <option value='pumice'>PUMICE</option>
+        <option value='pyrite'>PYRITE</option>
+        <option value='pyrophyllite'>PYROPHYLLITE</option>
+        <option value='quartz'>QUARTZ</option>
+        <option value='radium'>RADIUM</option>
+        <option value='rareearthelements'>RAREEARTHELEMENTS</option>
+        <option value='ree'>REE</option>
+        <option value='refiner'>REFINER</option>
+        <option value='refinery'>REFINERY</option>
+        <option value='rhenium'>RHENIUM</option>
+        <option value='rhodium'>RHODIUM</option>
+        <option value='rockasphalt'>ROCKASPHALT</option>
+        <option value='rubidium'>RUBIDIUM</option>
+        <option value='ruby'>RUBY</option>
+        <option value='ruthenium'>RUTHENIUM</option>
+        <option value='salt'>SALT</option>
+        <option value='sand'>SAND</option>
+        <option value='sandandgravel'>SANDANDGRAVEL</option>
+        <option value='sandstone'>SANDSTONE</option>
+        <option value='sapphire'>SAPPHIRE</option>
+        <option value='scandium'>SCANDIUM</option>
+        <option value='scheelite'>SCHEELITE</option>
+        <option value='selenium'>SELENIUM</option>
+        <option value='semipreciousgemstone'>SEMIPRECIOUSGEMSTONE</option>
+        <option value='silica'>SILICA</option>
+        <option value='silicate'>SILICATE</option>
+        <option value='silicon'>SILICON</option>
+        <option value='silver'>SILVER</option>
+        <option value='slate'>SLATE</option>
+        <option value='smelter'>SMELTER</option>
+        <option value='sodaash'>SODAASH</option>
+        <option value='sodium'>SODIUM</option>
+        <option value='sodiumcarbonate'>SODIUMCARBONATE</option>
+        <option value='sodiumsulfate'>SODIUMSULFATE</option>
+        <option value='staurolite'>STAUROLITE</option>
+        <option value='stone'>STONE</option>
+        <option value='strontium'>STRONTIUM</option>
+        <option value='subbituminous'>SUBBITUMINOUS</option>
+        <option value='sulfides'>SULFIDES</option>
+        <option value='sulfur'>SULFUR</option>
+        <option value='sulfur-pyrite'>SULFUR-PYRITE</option>
+        <option value='sulfuricacid'>SULFURICACID</option>
+        <option value='sylvinite'>SYLVINITE</option>
+        <option value='tailings'>TAILINGS</option>
+        <option value='talc-soapstone'>TALC-SOAPSTONE</option>
+        <option value='tantalum'>TANTALUM</option>
+        <option value='tantalumfromtinslag'>TANTALUMFROMTINSLAG</option>
+        <option value='tellurium'>TELLURIUM</option>
+        <option value='thallium'>THALLIUM</option>
+        <option value='thorium'>THORIUM</option>
+        <option value='tin'>TIN</option>
+        <option value='titanium'>TITANIUM</option>
+        <option value='titanium-heavyminerals'>TITANIUM-HEAVYMINERALS</option>
+        <option value='titanium-ilmenite'>TITANIUM-ILMENITE</option>
+        <option value='titanium-rutile'>TITANIUM-RUTILE</option>
+        <option value='travertine'>TRAVERTINE</option>
+        <option value='tripoli'>TRIPOLI</option>
+        <option value='tungsten'>TUNGSTEN</option>
+        <option value='ultrapure'>ULTRAPURE</option>
+        <option value='uranium'>URANIUM</option>
+        <option value='vanadium'>VANADIUM</option>
+        <option value='vermiculite'>VERMICULITE</option>
+        <option value='volcanicmaterials'>VOLCANICMATERIALS</option>
+        <option value='water'>WATER</option>
+        <option value='wollastonite'>WOLLASTONITE</option>
+        <option value='yttrium'>YTTRIUM</option>
+        <option value='zeolite'>ZEOLITE</option>
+        <option value='zeolites'>ZEOLITES</option>
+        <option value='zinc'>ZINC</option>
+        <option value='zirconium'>ZIRCONIUM</option>
+      </select>
+    </span>
+    <span> Country:
+      <select id="country">
+        <option value='All'>All</option>
+        <option value='Afghanistan'>Afghanistan</option>
+        <option value='Albania'>Albania</option>
+        <option value='Algeria'>Algeria</option>
+        <option value='Angola'>Angola</option>
+        <option value='Antarctica'>Antarctica</option>
+        <option value='Antigua and Barbuda'>Antigua and Barbuda</option>
+        <option value='Argentina'>Argentina</option>
+        <option value='Armenia'>Armenia</option>
+        <option value='Australia'>Australia</option>
+        <option value='Austria'>Austria</option>
+        <option value='Azerbaijan'>Azerbaijan</option>
+        <option value='Bahamas, The'>Bahamas, The</option>
+        <option value='Bahamas, the'>Bahamas, the</option>
+        <option value='Bahrain'>Bahrain</option>
+        <option value='Bangladesh'>Bangladesh</option>
+        <option value='Barbados'>Barbados</option>
+        <option value='Belarus'>Belarus</option>
+        <option value='Belgium'>Belgium</option>
+        <option value='Belize'>Belize</option>
+        <option value='Benin'>Benin</option>
+        <option value='Bolivia'>Bolivia</option>
+        <option value='Bosnia and Herzegovina'>Bosnia and Herzegovina</option>
+        <option value='Botswana'>Botswana</option>
+        <option value='Brazil'>Brazil</option>
+        <option value='Bulgaria'>Bulgaria</option>
+        <option value='Burkina Faso'>Burkina Faso</option>
+        <option value='Burma'>Burma</option>
+        <option value='Burundi'>Burundi</option>
+        <option value='Cambodia'>Cambodia</option>
+        <option value='Cameroon'>Cameroon</option>
+        <option value='Canada'>Canada</option>
+        <option value='Chile'>Chile</option>
+        <option value='China'>China</option>
+        <option value='Colombia'>Colombia</option>
+        <option value='Congo'>Congo</option>
+        <option value='Congo (Brazzaville)'>Congo (Brazzaville)</option>
+        <option value='Congo (Kinshasa)'>Congo (Kinshasa)</option>
+        <option value='Costa Rica'>Costa Rica</option>
+        <option value="Cote D'Ivoire">Cote D'Ivoire</option>
+        <option value='Croatia'>Croatia</option>
+        <option value='Cuba'>Cuba</option>
+        <option value='Cyprus'>Cyprus</option>
+        <option value='Czech Republic'>Czech Republic</option>
+        <option value="CÃ´te d'Ivoire">CÃ´te d'Ivoire</option>
+        <option value='Denmark'>Denmark</option>
+        <option value='Dominica'>Dominica</option>
+        <option value='Dominican Republic'>Dominican Republic</option>
+        <option value='Ecuador'>Ecuador</option>
+        <option value='Egypt'>Egypt</option>
+        <option value='El Salvador'>El Salvador</option>
+        <option value='Eritrea'>Eritrea</option>
+        <option value='Estonia'>Estonia</option>
+        <option value='Ethiopia'>Ethiopia</option>
+        <option value='Fiji'>Fiji</option>
+        <option value='Finland'>Finland</option>
+        <option value='France'>France</option>
+        <option value='Gabon'>Gabon</option>
+        <option value='Gambia, the'>Gambia, the</option>
+        <option value='Georgia'>Georgia</option>
+        <option value='Germany'>Germany</option>
+        <option value='Ghana'>Ghana</option>
+        <option value='Greece'>Greece</option>
+        <option value='Greenland'>Greenland</option>
+        <option value='Guatemala'>Guatemala</option>
+        <option value='Guinea'>Guinea</option>
+        <option value='Guinea-Bissau'>Guinea-Bissau</option>
+        <option value='Guyana'>Guyana</option>
+        <option value='Haiti'>Haiti</option>
+        <option value='Honduras'>Honduras</option>
+        <option value='Hungary'>Hungary</option>
+        <option value='Iceland'>Iceland</option>
+        <option value='India'>India</option>
+        <option value='Indonesia'>Indonesia</option>
+        <option value='Iran'>Iran</option>
+        <option value='Iraq'>Iraq</option>
+        <option value='Ireland'>Ireland</option>
+        <option value='Israel'>Israel</option>
+        <option value='Italy'>Italy</option>
+        <option value='Jamaica'>Jamaica</option>
+        <option value='Japan'>Japan</option>
+        <option value='Jordan'>Jordan</option>
+        <option value='Kazakhstan'>Kazakhstan</option>
+        <option value='Kenya'>Kenya</option>
+        <option value='Korea, North'>Korea, North</option>
+        <option value='Korea, South'>Korea, South</option>
+        <option value='Kosovo'>Kosovo</option>
+        <option value='Kyrgyz Republic'>Kyrgyz Republic</option>
+        <option value='Kyrgyzstan'>Kyrgyzstan</option>
+        <option value='Laos'>Laos</option>
+        <option value='Lebanon'>Lebanon</option>
+        <option value='Lesotho'>Lesotho</option>
+        <option value='Liberia'>Liberia</option>
+        <option value='Libya'>Libya</option>
+        <option value='Lithuania'>Lithuania</option>
+        <option value='Luxembourg'>Luxembourg</option>
+        <option value='Macedonia'>Macedonia</option>
+        <option value='Madagascar'>Madagascar</option>
+        <option value='Malawi'>Malawi</option>
+        <option value='Malaysia'>Malaysia</option>
+        <option value='Mali'>Mali</option>
+        <option value='Mauritania'>Mauritania</option>
+        <option value='Mexico'>Mexico</option>
+        <option value='Mongolia'>Mongolia</option>
+        <option value='Montenegro'>Montenegro</option>
+        <option value='Morocco'>Morocco</option>
+        <option value='Mozambique'>Mozambique</option>
+        <option value='Namibia'>Namibia</option>
+        <option value='Nauru'>Nauru</option>
+        <option value='Nepal'>Nepal</option>
+        <option value='Netherlands'>Netherlands</option>
+        <option value='New Zealand'>New Zealand</option>
+        <option value='Nicaragua'>Nicaragua</option>
+        <option value='Niger'>Niger</option>
+        <option value='Nigeria'>Nigeria</option>
+        <option value='Norway'>Norway</option>
+        <option value='Oman'>Oman</option>
+        <option value='Pakistan'>Pakistan</option>
+        <option value='Palau'>Palau</option>
+        <option value='Panama'>Panama</option>
+        <option value='Papua New Guinea'>Papua New Guinea</option>
+        <option value='Paraguay'>Paraguay</option>
+        <option value='Peru'>Peru</option>
+        <option value='Philippines'>Philippines</option>
+        <option value='Poland'>Poland</option>
+        <option value='Portugal'>Portugal</option>
+        <option value='Qatar'>Qatar</option>
+        <option value='Republic of Madagascar'>Republic of Madagascar</option>
+        <option value='Republic of Malawi'>Republic of Malawi</option>
+        <option value='Republic of PanamÃ¡'>Republic of PanamÃ¡</option>
+        <option value='Romania'>Romania</option>
+        <option value='Russia'>Russia</option>
+        <option value='Russia, Kazakhstan'>Russia, Kazakhstan</option>
+        <option value='Russian Federation'>Russian Federation</option>
+        <option value='Rwanda'>Rwanda</option>
+        <option value='Saint Kitts and Nevis'>Saint Kitts and Nevis</option>
+        <option value='Saint Lucia'>Saint Lucia</option>
+        <option value='Saint Vincent and the Grenadines'>Saint Vincent and the Grenadines</option>
+        <option value='Saudi Arabia'>Saudi Arabia</option>
+        <option value='Senegal'>Senegal</option>
+        <option value='Serbia'>Serbia</option>
+        <option value='Sierra Leone'>Sierra Leone</option>
+        <option value='Singapore'>Singapore</option>
+        <option value='Slovakia'>Slovakia</option>
+        <option value='Slovenia'>Slovenia</option>
+        <option value='Solomon Islands'>Solomon Islands</option>
+        <option value='Somalia'>Somalia</option>
+        <option value='South Africa'>South Africa</option>
+        <option value='South Korea'>South Korea</option>
+        <option value='Spain'>Spain</option>
+        <option value='Sri Lanka'>Sri Lanka</option>
+        <option value='Sudan'>Sudan</option>
+        <option value='Sunyani-Ghana'>Sunyani-Ghana</option>
+        <option value='Suriname'>Suriname</option>
+        <option value='Swaziland'>Swaziland</option>
+        <option value='Sweden'>Sweden</option>
+        <option value='Switzerland'>Switzerland</option>
+        <option value='Syria'>Syria</option>
+        <option value='Taiwan'>Taiwan</option>
+        <option value='Tajikistan'>Tajikistan</option>
+        <option value='Tanzania'>Tanzania</option>
+        <option value='Thailand'>Thailand</option>
+        <option value='Togo'>Togo</option>
+        <option value='Trinidad and Tobago'>Trinidad and Tobago</option>
+        <option value='Tunisia'>Tunisia</option>
+        <option value='Turkey'>Turkey</option>
+        <option value='Turkmenistan'>Turkmenistan</option>
+        <option value='USA'>USA</option>
+        <option value='Uganda'>Uganda</option>
+        <option value='Ukraine'>Ukraine</option>
+        <option value='United Arab Emirates'>United Arab Emirates</option>
+        <option value='United Kingdom'>United Kingdom</option>
+        <option value='United States'>United States</option>
+        <option value='Uruguay'>Uruguay</option>
+        <option value='Uzbekistan'>Uzbekistan</option>
+        <option value='Vanuatu'>Vanuatu</option>
+        <option value='Venezuela'>Venezuela</option>
+        <option value='Vietnam'>Vietnam</option>
+        <option value='Western Sahara'>Western Sahara</option>
+        <option value='Zambia'>Zambia</option>
+        <option value='Zimbabwe'>Zimbabwe</option>
+      </select>
+    </span>
+    <label id="label 43101" for="43101"> 43-101</label><input type="checkbox" id="43101" name="43101" checked>
+    <input id="refresh" type="button" onclick="refreshMap();" value="Refresh Map">
+  </div>
+  <script>
+    // document event listeners
+    document.addEventListener("touchstart", function(e) {
+      console.log(e.defaultPrevented); // will be false
+      e.preventDefault(); // does nothing since the listener is passive
+      console.log(e.defaultPrevented); // still false
+    }, {
+      passive: true
+    });
+
+
+    document.addEventListener("touchmove", function(e) {
+      console.log(e.defaultPrevented); // will be false
+      e.preventDefault(); // does nothing since the listener is passive
+      console.log(e.defaultPrevented); // still false
+    }, {
+      passive: true
+    });
+
+
+    // custom styling of map
+    // link
+    var myStyle = [{
+      featureType: "landscape",
+      elementType: "all",
+      stylers: [{
+          hue: "#ffa200"
+        },
+        {
+          lightness: -20
+        }
+      ]
+    }, {
+      featureType: "water",
+      elementType: "all",
+      stylers: [{
+          hue: "#ff9100"
+        },
+        {
+          lightness: 52
+        }
+      ]
+    }, {
+      featureType: "administrative",
+      elementType: "labels",
+      stylers: [{
+          hue: "#1100ff"
+        },
+        {
+          saturation: -100
+        },
+        {
+          lightness: -18
+        }
+      ]
+    }, {
+      featureType: "poi",
+      elementType: "all",
+      stylers: [{
+          lightness: -18
+        },
+        {
+          visibility: "off"
+        }
+      ]
+    }, {
+      featureType: "landscape",
+      elementType: "all",
+      stylers: [{
+        visibility: "off"
+      }]
+    }, {
+      featureType: "water",
+      elementType: "labels",
+      stylers: [{
+          lightness: -18
+        },
+        {
+          visibility: "off"
+        }
+      ]
+    }, {
+      featureType: "road",
+      elementType: "labels",
+      stylers: [{
+        visibility: "off"
+      }]
+    }, {
+      featureType: "administrative",
+      elementType: "geometry",
+      stylers: [{
+        visibility: "simplified"
+      }]
+    },
+    {
+	  	featureType: "administrative.country",
+  		elementType: "geometry.fill",
+  		stylers: [
+  			{ visibility: "on" }
+  		]
+    },
+    {
+      featureType: "administrative.country",
+    elementType: "geometry.stroke",
+    stylers: [
+      { visibility: "on" }
+    ]
+    }
+    , {
+      featureType: "road.highway",
+      elementType: "geometry",
+      stylers: [
+        { visibility: "off" }
+      ]
+    }, {
+      featureType: "road.arterial",
+      elementType: "geometry",
+      stylers: [{
+        saturation: -100
+      }]
+    }, {
+      featureType: "road.local",
+      elementType: "geometry",
+      stylers: [
+        { visibility: "off" }
+      ]
+    }, {
+      featureType: "transit",
+      elementType: "all",
+      stylers: [
+        { visibility: "off" }
+      ]
+    }];
+
+    var brownMap = [
+      {
+        featureType: "administrative",
+        elementType: "all",
+        stylers: [
+          { visibility: "on" }
+        ]
+      },{
+        featureType: "poi",
+        elementType: "all",
+        stylers: [
+          { visibility: "off" }
+        ]
+      },{
+        featureType: "road",
+        elementType: "all",
+        stylers: [
+          { visibility: "off" }
+        ]
+      },{
+        featureType: "transit",
+        elementType: "all",
+        stylers: [
+          { visibility: "off" }
+        ]
+      },{
+        featureType: "water",
+        elementType: "labels",
+        stylers: [
+          { visibility: "off" }
+        ]
+      },{
+        featureType: "landscape",
+        elementType: "all",
+        stylers: [
+          { saturation: 100 },
+          { lightness: -50 },
+          { hue: "#ffd500" },
+          { gamma: 0.5 }
+        ]
+      }
+    ];
+
+    var greenSea = [
+        {
+          featureType: "administrative",
+          elementType: "all",
+          stylers: [
+            { visibility: "on" }
+          ]
+        },{
+          featureType: "landscape",
+          elementType: "all",
+          stylers: [
+            { visibility: "off" }
+          ]
+        },{
+          featureType: "poi",
+          elementType: "all",
+          stylers: [
+            { visibility: "off" }
+          ]
+        },{
+          featureType: "road",
+          elementType: "all",
+          stylers: [
+            { visibility: "off" }
+          ]
+        },{
+          featureType: "transit",
+          elementType: "all",
+          stylers: [
+            { visibility: "off" }
+          ]
+        },{
+          featureType: "water",
+          elementType: "labels",
+          stylers: [
+            { visibility: "off" }
+          ]
+        },{
+          featureType: "all",
+          elementType: "all",
+          stylers: [
+            { hue: "#11ff00" }
+          ]
+        }
+      ];
+
+    var tanMap = [
+        {
+          featureType: "administrative",
+          elementType: "all",
+          stylers: [
+            { visibility: "on" }
+          ]
+        },{
+          featureType: "poi",
+          elementType: "all",
+          stylers: [
+            { visibility: "off" }
+          ]
+        },{
+          featureType: "road",
+          elementType: "all",
+          stylers: [
+            { visibility: "off" }
+          ]
+        },{
+          featureType: "transit",
+          elementType: "all",
+          stylers: [
+            { visibility: "off" }
+          ]
+        },{
+          featureType: "water",
+          elementType: "labels",
+          stylers: [
+            { visibility: "off" }
+          ]
+        },{
+          featureType: "landscape",
+          elementType: "all",
+          stylers: [
+            { saturation: 100 },
+            { hue: "#ffd500" },
+            { gamma: 0.5 },
+            { lightness: 10 }
+          ]
+        }
+      ];
+
+
+    // state variables
+
+    const country_dict = {
+      "All":{
+        "Zoom": 3,
+        "Index": -1
+      },
+      "Afghanistan": {
+        "Zoom": 7,
+        "Index": 0
+      },
+      "Albania": {
+        "Zoom": 8,
+        "Index": 1
+      },
+      "Algeria": {
+        "Zoom": 7,
+        "Index": 2
+      },
+      "Angola": {
+        "Zoom": 6,
+        "Index": 3
+      },
+      "Antarctica": {
+        "Zoom": 1,
+        "Index": 4
+      },
+      "Antigua and Barbuda": {
+        "Zoom": 12,
+        "Index": 5
+      },
+      "Argentina": {
+        "Zoom": 4,
+        "Index": 6
+      },
+      "Armenia": {
+        "Zoom": 7,
+        "Index": 7
+      },
+      "Australia": {
+        "Zoom": 5,
+        "Index": 8
+      },
+      "Austria": {
+        "Zoom": 7,
+        "Index": 9
+      },
+      "Azerbaijan": {
+        "Zoom": 7,
+        "Index": 10
+      },
+      "Bahamas, The": {
+        "Zoom": 8,
+        "Index": 11
+      },
+      "Bahamas, the": {
+        "Zoom": 8,
+        "Index": 12
+      },
+      "Bahrain": {
+        "Zoom": 9,
+        "Index": 13
+      },
+      "Bangladesh": {
+        "Zoom": 8,
+        "Index": 14
+      },
+      "Barbados": {
+        "Zoom": 10,
+        "Index": 15
+      },
+      "Belarus": {
+        "Zoom": 7,
+        "Index": 16
+      },
+      "Belgium": {
+        "Zoom": 8,
+        "Index": 17
+      },
+      "Belize": {
+        "Zoom": 9,
+        "Index": 18
+      },
+      "Benin": {
+        "Zoom": 7,
+        "Index": 19
+      },
+      "Bolivia": {
+        "Zoom": 6,
+        "Index": 20
+      },
+      "Bosnia and Herzegovina": {
+        "Zoom": 7,
+        "Index": 21
+      },
+      "Botswana": {
+        "Zoom": 7,
+        "Index": 22
+      },
+      "Brazil": {
+        "Zoom": 4,
+        "Index": 23
+      },
+      "Bulgaria": {
+        "Zoom": 8,
+        "Index": 24
+      },
+      "Burkina Faso": {
+        "Zoom": 6,
+        "Index": 25
+      },
+      "Burma": {
+        "Zoom": 5,
+        "Index": 26
+      },
+      "Burundi": {
+        "Zoom": 8,
+        "Index": 27
+      },
+      "Cambodia": {
+        "Zoom": 7,
+        "Index": 28
+      },
+      "Cameroon": {
+        "Zoom": 7,
+        "Index": 29
+      },
+      "Canada": {
+        "Zoom": 4,
+        "Index": 30
+      },
+      "Chile": {
+        "Zoom": 4,
+        "Index": 31
+      },
+      "China": {
+        "Zoom": 4,
+        "Index": 32
+      },
+      "Colombia": {
+        "Zoom": 6,
+        "Index": 33
+      },
+      "Congo": {
+        "Zoom": 5,
+        "Index": 34
+      },
+      "Congo (Brazzaville)": {
+        "Zoom": 7,
+        "Index": 35
+      },
+      "Congo (Kinshasa)": {
+        "Zoom": 5,
+        "Index": 36
+      },
+      "Costa Rica": {
+        "Zoom": 7,
+        "Index": 37
+      },
+      "Cote D'Ivoire": {
+        "Zoom": 7,
+        "Index": 38
+      },
+      "Croatia": {
+        "Zoom": 7,
+        "Index": 39
+      },
+      "Cuba": {
+        "Zoom": 7,
+        "Index": 40
+      },
+      "Cyprus": {
+        "Zoom": 8,
+        "Index": 41
+      },
+      "Czech Republic": {
+        "Zoom": 7,
+        "Index": 42
+      },
+      "CÃ´te d'Ivoire": {
+        "Zoom": 7,
+        "Index": 43
+      },
+      "Denmark": {
+        "Zoom": 7,
+        "Index": 44
+      },
+      "Dominica": {
+        "Zoom": 11,
+        "Index": 45
+      },
+      "Dominican Republic": {
+        "Zoom": 8,
+        "Index": 46
+      },
+      "Ecuador": {
+        "Zoom": 7,
+        "Index": 47
+      },
+      "Egypt": {
+        "Zoom": 6,
+        "Index": 48
+      },
+      "El Salvador": {
+        "Zoom": 9,
+        "Index": 49
+      },
+      "Eritrea": {
+        "Zoom": 7,
+        "Index": 50
+      },
+      "Estonia": {
+        "Zoom": 7,
+        "Index": 51
+      },
+      "Ethiopia": {
+        "Zoom": 5,
+        "Index": 52
+      },
+      "Fiji": {
+        "Zoom": 8,
+        "Index": 53
+      },
+      "Finland": {
+        "Zoom": 5,
+        "Index": 54
+      },
+      "France": {
+        "Zoom": 6,
+        "Index": 55
+      },
+      "Gabon": {
+        "Zoom": 7,
+        "Index": 56
+      },
+      "Gambia, the": {
+        "Zoom": 9,
+        "Index": 57
+      },
+      "Georgia": {
+        "Zoom": 7,
+        "Index": 58
+      },
+      "Germany": {
+        "Zoom": 6,
+        "Index": 59
+      },
+      "Ghana": {
+        "Zoom": 7,
+        "Index": 60
+      },
+      "Greece": {
+        "Zoom": 7,
+        "Index": 61
+      },
+      "Greenland": {
+        "Zoom": 4,
+        "Index": 62
+      },
+      "Guatemala": {
+        "Zoom": 7,
+        "Index": 63
+      },
+      "Guinea": {
+        "Zoom": 7,
+        "Index": 64
+      },
+      "Guinea-Bissau": {
+        "Zoom": 5,
+        "Index": 65
+      },
+      "Guyana": {
+        "Zoom": 7,
+        "Index": 66
+      },
+      "Haiti": {
+        "Zoom": 8,
+        "Index": 67
+      },
+      "Honduras": {
+        "Zoom": 7,
+        "Index": 68
+      },
+      "Hungary": {
+        "Zoom": 8,
+        "Index": 69
+      },
+      "Iceland": {
+        "Zoom": 7,
+        "Index": 70
+      },
+      "India": {
+        "Zoom": 5,
+        "Index": 71
+      },
+      "Indonesia": {
+        "Zoom": 5,
+        "Index": 72
+      },
+      "Iran": {
+        "Zoom": 6,
+        "Index": 73
+      },
+      "Iraq": {
+        "Zoom": 6,
+        "Index": 74
+      },
+      "Ireland": {
+        "Zoom": 7,
+        "Index": 75
+      },
+      "Israel": {
+        "Zoom": 8,
+        "Index": 76
+      },
+      "Italy": {
+        "Zoom": 6,
+        "Index": 77
+      },
+      "Jamaica": {
+        "Zoom": 9,
+        "Index": 78
+      },
+      "Japan": {
+        "Zoom": 6,
+        "Index": 79
+      },
+      "Jordan": {
+        "Zoom": 7,
+        "Index": 80
+      },
+      "Kazakhstan": {
+        "Zoom": 5,
+        "Index": 81
+      },
+      "Kenya": {
+        "Zoom": 7,
+        "Index": 82
+      },
+      "Korea, North": {
+        "Zoom": 7,
+        "Index": 83
+      },
+      "Korea, South": {
+        "Zoom": 7,
+        "Index": 84
+      },
+      "Kosovo": {
+        "Zoom": 1,
+        "Index": 85
+      },
+      "Kyrgyz Republic": {
+        "Zoom": 7,
+        "Index": 86
+      },
+      "Kyrgyzstan": {
+        "Zoom": 7,
+        "Index": 87
+      },
+      "Laos": {
+        "Zoom": 6,
+        "Index": 88
+      },
+      "Lebanon": {
+        "Zoom": 8,
+        "Index": 89
+      },
+      "Lesotho": {
+        "Zoom": 8,
+        "Index": 90
+      },
+      "Liberia": {
+        "Zoom": 8,
+        "Index": 91
+      },
+      "Libya": {
+        "Zoom": 6,
+        "Index": 92
+      },
+      "Lithuania": {
+        "Zoom": 8,
+        "Index": 93
+      },
+      "Luxembourg": {
+        "Zoom": 8,
+        "Index": 94
+      },
+      "Macedonia": {
+        "Zoom": 8,
+        "Index": 95
+      },
+      "Madagascar": {
+        "Zoom": 6,
+        "Index": 96
+      },
+      "Malawi": {
+        "Zoom": 7,
+        "Index": 97
+      },
+      "Malaysia": {
+        "Zoom": 5,
+        "Index": 98
+      },
+      "Mali": {
+        "Zoom": 6,
+        "Index": 99
+      },
+      "Mauritania": {
+        "Zoom": 5,
+        "Index": 100
+      },
+      "Mexico": {
+        "Zoom": 5,
+        "Index": 101
+      },
+      "Mongolia": {
+        "Zoom": 6,
+        "Index": 102
+      },
+      "Montenegro": {
+        "Zoom": 8,
+        "Index": 103
+      },
+      "Morocco": {
+        "Zoom": 6,
+        "Index": 104
+      },
+      "Mozambique": {
+        "Zoom": 6,
+        "Index": 105
+      },
+      "Namibia": {
+        "Zoom": 6,
+        "Index": 106
+      },
+      "Nauru": {
+        "Zoom": 12,
+        "Index": 107
+      },
+      "Nepal": {
+        "Zoom": 8,
+        "Index": 108
+      },
+      "Netherlands": {
+        "Zoom": 7,
+        "Index": 109
+      },
+      "New Zealand": {
+        "Zoom": 6,
+        "Index": 110
+      },
+      "Nicaragua": {
+        "Zoom": 8,
+        "Index": 111
+      },
+      "Niger": {
+        "Zoom": 6,
+        "Index": 112
+      },
+      "Nigeria": {
+        "Zoom": 7,
+        "Index": 113
+      },
+      "Norway": {
+        "Zoom": 5,
+        "Index": 114
+      },
+      "Oman": {
+        "Zoom": 7,
+        "Index": 115
+      },
+      "Pakistan": {
+        "Zoom": 6,
+        "Index": 116
+      },
+      "Palau": {
+        "Zoom": 11,
+        "Index": 117
+      },
+      "Panama": {
+        "Zoom": 7,
+        "Index": 118
+      },
+      "Papua New Guinea": {
+        "Zoom": 6,
+        "Index": 119
+      },
+      "Paraguay": {
+        "Zoom": 7,
+        "Index": 120
+      },
+      "Peru": {
+        "Zoom": 5,
+        "Index": 121
+      },
+      "Philippines": {
+        "Zoom": 6,
+        "Index": 122
+      },
+      "Poland": {
+        "Zoom": 7,
+        "Index": 123
+      },
+      "Portugal": {
+        "Zoom": 7,
+        "Index": 124
+      },
+      "Qatar": {
+        "Zoom": 8,
+        "Index": 125
+      },
+      "Republic of Madagascar": {
+        "Zoom": 6,
+        "Index": 126
+      },
+      "Republic of Malawi": {
+        "Zoom": 7,
+        "Index": 127
+      },
+      "Republic of Panam\u00c3\u00a1": {
+        "Zoom": 8,
+        "Index": 128
+      },
+      "Romania": {
+        "Zoom": 7,
+        "Index": 129
+      },
+      "Russia": {
+        "Zoom": 3,
+        "Index": 130
+      },
+      "Russia, Kazakhstan": {
+        "Zoom": 3,
+        "Index": 131
+      },
+      "Russian Federation": {
+        "Zoom": 3,
+        "Index": 132
+      },
+      "Rwanda": {
+        "Zoom": 8,
+        "Index": 133
+      },
+      "Saint Kitts and Nevis": {
+        "Zoom": 10,
+        "Index": 134
+      },
+      "Saint Lucia": {
+        "Zoom": 10,
+        "Index": 135
+      },
+      "Saint Vincent and the Grenadines": {
+        "Zoom": 11,
+        "Index": 136
+      },
+      "Saudi Arabia": {
+        "Zoom": 5,
+        "Index": 137
+      },
+      "Senegal": {
+        "Zoom": 7,
+        "Index": 138
+      },
+      "Serbia": {
+        "Zoom": 7,
+        "Index": 139
+      },
+      "Sierra Leone": {
+        "Zoom": 8,
+        "Index": 140
+      },
+      "Singapore": {
+        "Zoom": 8,
+        "Index": 141
+      },
+      "Slovakia": {
+        "Zoom": 7,
+        "Index": 142
+      },
+      "Slovenia": {
+        "Zoom": 9,
+        "Index": 143
+      },
+      "Solomon Islands": {
+        "Zoom": 8,
+        "Index": 144
+      },
+      "Somalia": {
+        "Zoom": 6,
+        "Index": 145
+      },
+      "South Africa": {
+        "Zoom": 6,
+        "Index": 146
+      },
+      "South Korea": {
+        "Zoom": 7,
+        "Index": 147
+      },
+      "Spain": {
+        "Zoom": 6,
+        "Index": 148
+      },
+      "Sri Lanka": {
+        "Zoom": 8,
+        "Index": 149
+      },
+      "Sudan": {
+        "Zoom": 5,
+        "Index": 150
+      },
+      "Sunyani-Ghana": {
+        "Zoom": 7,
+        "Index": 151
+      },
+      "Suriname": {
+        "Zoom": 7,
+        "Index": 152
+      },
+      "Swaziland": {
+        "Zoom": 9,
+        "Index": 153
+      },
+      "Sweden": {
+        "Zoom": 5,
+        "Index": 154
+      },
+      "Switzerland": {
+        "Zoom": 7,
+        "Index": 155
+      },
+      "Syria": {
+        "Zoom": 7,
+        "Index": 156
+      },
+      "Taiwan": {
+        "Zoom": 8,
+        "Index": 157
+      },
+      "Tajikistan": {
+        "Zoom": 7,
+        "Index": 158
+      },
+      "Tanzania": {
+        "Zoom": 6,
+        "Index": 159
+      },
+      "Thailand": {
+        "Zoom": 6,
+        "Index": 160
+      },
+      "Togo": {
+        "Zoom": 9,
+        "Index": 161
+      },
+      "Trinidad and Tobago": {
+        "Zoom": 5,
+        "Index": 162
+      },
+      "Tunisia": {
+        "Zoom": 6,
+        "Index": 163
+      },
+      "Turkey": {
+        "Zoom": 6,
+        "Index": 164
+      },
+      "Turkmenistan": {
+        "Zoom": 6,
+        "Index": 165
+      },
+      "USA": {
+        "Zoom": 5,
+        "Index": 166
+      },
+      "Uganda": {
+        "Zoom": 7,
+        "Index": 167
+      },
+      "Ukraine": {
+        "Zoom": 6,
+        "Index": 168
+      },
+      "United Arab Emirates": {
+        "Zoom": 7,
+        "Index": 169
+      },
+      "United Kingdom": {
+        "Zoom": 6,
+        "Index": 170
+      },
+      "United States": {
+        "Zoom": 4,
+        "Index": 171
+      },
+      "Uruguay": {
+        "Zoom": 7,
+        "Index": 172
+      },
+      "Uzbekistan": {
+        "Zoom": 6,
+        "Index": 173
+      },
+      "Vanuatu": {
+        "Zoom": 8,
+        "Index": 174
+      },
+      "Venezuela": {
+        "Zoom": 6,
+        "Index": 175
+      },
+      "Vietnam": {
+        "Zoom": 6,
+        "Index": 176
+      },
+      "Western Sahara": {
+        "Zoom": 7,
+        "Index": 177
+      },
+      "Zambia": {
+        "Zoom": 7,
+        "Index": 178
+      },
+      "Zimbabwe": {
+        "Zoom": 7,
+        "Index": 179
+      }
+    };
+
+    mineral_map ={
+      "All": 0,
+      "Gold": 1,
+      "Copper":2
+    };
+
+
+
+    let map;
+    var markers = [];
+
+    var count_43101=0;
+
+    var geocoder;
+
+    var open_markers=[];
+
+
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 2,
+        center: new google.maps.LatLng(-1,0),
+        mapTypeControlOptions: {
+            mapTypeIds: ["terrain","mystyle","greenSea","brownMap","tan"],
+        },
+        mapTypeId: 'terrain',
+      });
+
+      google.maps.event.addListener(map, "click", function() {
+          //document.getElementById('info').innerHTML = "";
+      });
+
+      geocoder= new google.maps.Geocoder();
+
+      // add KML layer
+      /*
+      kmlLayer = new google.maps.KmlLayer('http://www.geocodezip.com/geoxml3_test/world_countries_kml.xml', {
+          preserveViewport: true,
+          suppressInfoWindows: false
+      });
+      kmlLayer.setMap(map);
+      */
+
+
+      //google.maps.event.addListener(kmlLayer, 'click', openIW);
+
+
+      map.mapTypes.set('mystyle', new google.maps.StyledMapType(myStyle, {
+        name: 'Grey'
+      }));
+
+      map.mapTypes.set('brownMap', new google.maps.StyledMapType(brownMap, {
+        name: 'Brown'
+      }));
+
+      map.mapTypes.set('tan', new google.maps.StyledMapType(tanMap, {
+        name: 'Tan'
+      }));
+
+      map.mapTypes.set('greenSea', new google.maps.StyledMapType(greenSea, {
+        name: 'Green Sea'
+      }));
+
+
+      // Create a <script> tag and set the USGS URL as the source.
+      const script = document.createElement("script");
+      // This example uses a local copy of the GeoJSON stored at
+      // http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojsonp
+      //script.src ="http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojsonp";
+
+      //console.log(script);
+
+      var res = httpGet("https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/Global%2043101/43-101.json");
+
+      //console.log(res);
+      var obj = JSON.parse(res);
+      //console.log(obj);
+      //document.getElementsByTagName("head")[0].appendChild(script);
+
+
+
+      eqfeed_callback(obj);
+
+      var refresh = document.getElementById("refresh");
+      google.maps.event.addDomListener(refresh, "click", refreshMap);
+
+
+      // load search parameters
+      // => allow access to the decoded query arguments contained in the URL
+
+      let params = (new URL(document.location)).searchParams;
+      console.log("Search params: "+params);
+
+      var searchParams = new URLSearchParams(params);
+
+      //Iterate the search parameters.
+      for (let p of searchParams) {
+        console.log(p);
+      }
+
+      if(searchParams.has("zoom")){
+          var input_zoom = searchParams.get("zoom");
+          console.log("parameter zoom level: "+input_zoom);
+
+          // zoom
+          if (input_zoom > 0 && input_zoom < 10) {
+            var zoom = document.getElementById("zoom");
+            var z = (Number(input_zoom));
+            zoom.options[zoom.selectedIndex].value=z;
+            zoom.selectedIndex=z;
+
+            map.setZoom(z);
+          };
+
+      };
+      if(searchParams.has("mineral")){
+        var minerals_obj = document.getElementById("mineral");
+        minerals_obj.selectedIndex=mineral_map[searchParams.get("mineral")];
+        //minerals_obj.options[minerals_obj.selectedIndex].value=searchParams.get("mineral");
+
+      };
+
+      //console.log(searchParams.has("country"));
+
+      if(searchParams.has("country")){
+        var country_obj = document.getElementById("country");
+        country_obj.selectedIndex = country_dict[searchParams.get("country")]["Index"]+1;
+        //country_obj.options[country_obj.selectedIndex].value=searchParams.get("country");
+        country=searchParams.get("country");
+        console.log("Selected Country: "+country);
+      }else{ // set default country
+        var country_obj = document.getElementById("country");
+        country_obj.selectedIndex = country_dict["All"]["Index"]+1;
+        //country_obj.options[country_obj.selectedIndex].value=searchParams.get("country");
+        country="All";
+      };
+
+      if(searchParams.has("43101")){
+          console.log("43101 flag: "+searchParams.get("43101"));
+          console.log(document.getElementById("43101"));
+          if(searchParams.get("43101")=="on"){
+              document.getElementById("43101").checked=true;
+          }else{
+              document.getElementById("43101").checked=false;
+          }
+      }
+      // change search filters
+      refreshMap();
+      // reset country field to default
+      //country="default";
+    }
+
+    // Customizing markers by map features => colors for dots
+    var icons = {
+      "gold": "#FAFAD2",
+      "copper": "#b87333",
+      "aggregate": "#3d3dcb",
+      "aluminum": "#848789",
+      "antimony": "#4c4f4d",
+      "barite": "#f9f6e5",
+      "berrylium": "#da680f",
+      "boron": "#39ff14",
+      "cerium": "#26bd45",
+      "cesium": "#67ADDF",
+      "chalcopyrite": "#0bda51",
+      "chromite": "#7fffd4",
+      "chromium": "#c6c8c9",
+      "coal": "#36454f",
+      "diamond": "#b9f2ff",
+      "emerald": "#14A989",
+      "graphite": "#251607",
+      "lead": "#6d6a65",
+      "magnesium": "#5d7a78",
+      "magnetite": "#b4b6b1",
+      "mercury": "#747b81",
+      "molybdenite": "#6699cc",
+      "molybdenum": "#B87333",
+      "nickel": "#727472",
+      "nobium": "#F1DDB8",
+      "palladium": "#c1c1bb",
+      "phosphate": "#a65169",
+      "platinum-grougp": "#e5e4e2",
+      "platinum": "#e5e4e2",
+      "potash": "#e07757",
+      "potassium": "#e07757",
+      "rhodium": "#e5e4e2",
+      "silver": "#C0C0C0",
+      "titanium": "#878681",
+      "tungsten": "#767980",
+      "vanadium": "#0047ab",
+      "zeolite": "#2b1025",
+      "zinc": "#91888B",
+      "manganese": "#242d36",
+      "rare_earth": "#665647",
+      "other": "#000080"
+    };
+
+
+    // Loop through the results array and place a marker for each
+    // set of coordinates.
+    const eqfeed_callback = function(results) {
+      var bounds  = new google.maps.LatLngBounds();
+
+
+      count_43101=0;
+
+      for (let i = 0; i < results.features.length; i++) {
+        const coords = results.features[i].geometry.coordinates;
+
+        var location = results.features[i];
+        var tag;
+
+        if (location.properties.mineral_tags.length == 0) {
+          tag = "other";
+        } else if (icons.hasOwnProperty(location.properties.mineral_tags[0])) {
+          tag = location.properties.mineral_tags[0];
+        } else {
+          tag = "other";
+        }
+
+        var icon_obj;
+
+        if (location.properties.report_type == "usgs") {
+          icon_obj = {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: icons[tag],
+            fillOpacity: 0.5,
+            strokeOpacity: 0.5,
+            strokeWeight: 1,
+            scale: 6
+          };
+
+        } else if (location.properties.report_type == "43101") {
+          //console.log("43101");
+          icon_obj = 'https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/JSON%20file/Prospector_3D%20Logo_Icon_ico32.ico';
+          count_43101+=1;
+        }
+        //console.log(icons[tag].icon);
+
+        const latLng = new google.maps.LatLng(coords[1], coords[0]);
+
+        bounds.extend(latLng);
+
+        const prop = location.properties;
+        var contentString = "";
+
+        if (prop != null) {
+          if (location.properties.report_type == "usgs") {
+
+            var mins= prop.mineral_tags;
+
+            mins= mins.join(" ");
+
+            // updating fields for div tip
+            tipname=prop.site_name;
+            reporter_s=prop.reporter ;
+            state = prop.region;
+            country = prop.country;
+            dev_state = prop.state;
+            dep_id = prop.dep_id;
+            data_id= prop.mrds_id;
+            commodity = mins;
+            url= prop.url;
+
+            // update
+            update_USGS_Tip();
+            contentString=txt; // comment out after test
+            //contentString="USGS";
+          }else if (location.properties.report_type == "43101") {
+            //console.log("43101");
+            var mins= prop.mineral_tags;
+
+            mins= mins.join(" ");
+
+            // updating fields for div tip
+            company = prop.company;
+            nm=prop.name;
+            country= prop.country;
+            report_date = prop.report_date;
+            mineral = mins;
+            resource_estimate= prop.mineral_resources_estimate;
+            authors = prop.qualified_author_s_;
+            deposit_type= prop.deposit_type;
+            download_link= prop.___link;
+            ai_insights = prop.search_link;
+
+            // update
+            update_43_Tip();
+            contentString=txt; // comment out after test
+            //contentString="43101";
+          }
+        } else {
+          contentString = '<div id="content">' +
+            '<div id="siteNotice">' +
+            "</div>" +
+            '<h1 id="firstHeading" class="firstHeading"> Sitename: Sitename  - department id </h1>' +
+            "</div>" +
+            "</div>";
+        }
+
+        // test
+        //console.log(contentString);
+
+        const infowindow = new google.maps.InfoWindow({
+          content: contentString,
+        });
+
+        const marker = new google.maps.Marker({
+          position: latLng,
+          map: map,
+          icon: icon_obj,
+          infowindow: infowindow
+          //icon: icons[tag].icon,
+          //fillColor: 'green'
+        });
+
+        // Event listeners for each marker
+        marker.addListener("click", () => {
+          //console.log(infowindow);
+          marker.infowindow.open(map, marker);
+          // remove all other markers
+          open_markers.forEach(function(mk){
+              mk.infowindow.close(map,mk);
+          });
+          open_markers=[];
+          open_markers.push(marker);
+          map.setCenter(marker.getPosition());
+        });
+        // optional
+        /*
+        marker.addListener("mouseout", () => {
+          infowindow.close();
+        });
+        */
+        markers.push([marker, prop.mineral_tags, prop.country, prop.state,infowindow, location.properties.report_type]);
+      };
+
+      // update checkbox total count updates
+      document.getElementById('label 43101').innerHTML="43-101 ("+count_43101+")";
+
+      country="default";
+    };
+
+    function httpGet(theUrl) {
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.open("GET", theUrl, false); // false for synchronous request
+      xmlHttp.send(null);
+      return xmlHttp.responseText;
+    };
+
+    // ******   new methods
+
+    // Sets the map on all markers in the array.
+    function setMapOnAll(map) {
+      for (let i = 0; i < markers.length; i++) {
+        markers[i][0].setMap(map);
+      }
+    }
+
+    // modify to process all marker attributes and update using fields
+    function refreshMap() { // clear markers and update with inputs
+      //console.log("refreshing map");
+
+      var minerals_obj = document.getElementById("mineral");
+      var mineral = minerals_obj.options[minerals_obj.selectedIndex].value;
+
+      //console.log("selected mineral: " + mineral);
+
+      var country_obj = document.getElementById("country");
+      country = country_obj.options[country_obj.selectedIndex].value;
+
+
+      //console.log(country);
+
+      //console.log("Zoom level: " + map.zoom);
+
+      //console.log("43-101:  "+(document.getElementById("43101").checked));
+
+
+      // filter out by tag
+      for (let i = 0; i < markers.length; i++) {
+        //console.log(markers[i][5]);
+        if (document.getElementById("43101").checked && markers[i][5]==="43101") {
+          markers[i][0].setMap(map);
+        }
+        else {
+          //console.log("Removed "+markers[i][3]);
+          markers[i][0].setMap(null);
+        }
+      };
+
+      //console.log("Markers length: "+markers.length);
+      // refresh country points if different country
+      if((markers.length>0 && markers[0][2]!=country) || markers.length==0 || (markers.length>0 && "Mexico"==country)){
+          console.log("New country: "+country);
+          // remove old points to speed up map
+          for (let i = 0; i < markers.length; i++) {
+                markers[i][0].setMap(null);
+          };
+          markers=[];
+          // handle different countries
+          var res = httpGet("https://raw.githubusercontent.com/mkhanyisig/RandomCodeSamples/master/Global%2043101/43-101.json");
+
+          var obj = JSON.parse(res);
+
+          // update map properties
+          // center
+          if(country=="All"){
+                console.log("Country is all");
+                map.setCenter(new google.maps.LatLng(20,-30));
+          }else{
+            geocoder.geocode( {'address' : country}, function(results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    map.setCenter(results[0].geometry.location);
+                }
+            });
+          }
+
+
+          // set zoom
+          map.setZoom(country_dict[country]["Zoom"]);
+          //console.log(country+" zoom: "+map.zoom);
+
+          // update points
+          eqfeed_callback(obj);
+
+          // other stuff
+
+      };
+
+      // filter out minerals
+      //console.log("Filter mineral: "+mineral);
+      for (let i = 0; i < markers.length; i++) {
+        //console.log("Selected mineral: "+mineral);
+        //console.log("minerals: "+markers[i][1]);
+        if (mineral == "All") {
+          // place on map, visible
+          //console.log("Mineral: All");
+          markers[i][0].setMap(map);
+        } else if (markers[i][1].includes(mineral.toLowerCase())) {
+          //console.log("toggle: "+mineral);
+          // place on map, visible
+          console.log(markers[i][5]+"\n"+markers[i][1]);
+          markers[i][0].setMap(map);
+        } else {
+          //console.log("removed")
+          markers[i][0].setMap(null);
+        }
+      };
+      //console.log(map.getCenter());
+      country="default";
+    };
+
+
+
+    // Removes the markers from the map, but keeps them in the array.
+    function clearMarkers() {
+      setMapOnAll(null);
+    }
+
+    // Deletes all markers in the array by removing references to them.
+    /*
+    function deleteMarkers() {
+      clearMarkers();
+      markers = [];
+    }
+    */
+  </script>
+</body>
+
+</html>
